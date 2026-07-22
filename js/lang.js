@@ -18,6 +18,7 @@ var LANG = {
     'nav.roadmap':      'Roadmap',
     'nav.lessons':      'Lessons',
     'nav.forum':        'Forum',
+    'nav.chat':         'Chat',
 
     // Auth
     'auth.tagline':     'Sign in to start learning Competitive Programming',
@@ -196,6 +197,7 @@ var LANG = {
     'nav.roadmap':      'Lộ trình',
     'nav.lessons':      'Bài giảng',
     'nav.forum':        'Diễn đàn',
+    'nav.chat':         'Chat',
 
     // Auth
     'auth.tagline':     'Đăng nhập để bắt đầu học Lập trình thi đấu',

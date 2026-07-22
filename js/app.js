@@ -114,7 +114,7 @@ function gateRegister(username, password, errEl) {
     }
     gateCreateSession(username, displayName, '');
     hideAuthGate();
-    init();
+    location.reload();
   });
 }
 
@@ -131,7 +131,7 @@ function gateLogin(username, password, errEl) {
     }
     gateCreateSession(username, res.data.display_name || username, res.data.avatar_url || '');
     hideAuthGate();
-    init();
+    location.reload();
   });
 }
 
@@ -159,7 +159,8 @@ function renderNavProfile() {
   badge.innerHTML = getAvatarHtml(forum.myName, forum.myAvatar, 7) +
     '<span class="text-xs text-slate-400 hidden sm:inline max-w-[100px] truncate">' + escapeHtml(forum.myName) + '</span>';
   if (forum.myAvatar) {
-    avatarBtn.innerHTML = '<img src="' + escapeHtml(forum.myAvatar) + '" alt="" class="w-full h-full rounded-full object-cover" onerror="this.remove();this.parentElement.textContent=\'&#' + forum.myName.charCodeAt(0) + ';\'" loading="lazy">';
+    var initial = forum.myName ? forum.myName.charAt(0).toUpperCase() : '?';
+    avatarBtn.innerHTML = '<img src="' + escapeHtml(forum.myAvatar) + '" alt="" class="w-full h-full rounded-full object-cover" onerror="this.remove();this.parentElement.textContent=\'' + initial + '\'" loading="lazy">';
   } else {
     avatarBtn.textContent = forum.myName.charAt(0).toUpperCase();
   }

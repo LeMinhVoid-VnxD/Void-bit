@@ -82,6 +82,7 @@ function switchForumTab(tab) {
   } else {
     forum.view = 'user-list';
     renderUserList(body);
+    trackPresence();
   }
 }
 
@@ -454,9 +455,10 @@ function loadAllUsers() {
       return;
     }
     var html = '';
+    var currentUser = (localStorage.getItem('voidbit_username') || '').toLowerCase();
     for (var i = 0; i < res.data.length; i++) {
       var u = res.data[i];
-      if (u.username === forum.myName.toLowerCase()) continue;
+      if (u.username === currentUser) continue;
       var displayName = u.display_name || u.username;
       html += '<div class="thread-card" onclick="openDM(\'' + escapeHtml(u.username) + '\')">' +
         '<div class="thread-card-left">' +
@@ -921,7 +923,12 @@ function saveProfile() {
     }
   }
   closeProfileModal();
-  renderForum();
+  // Re-render nav and update thread cards
+  if (typeof renderNavProfile === 'function') renderNavProfile();
+  var container = $('#forumContent') || $('#chatPageContent');
+  if (container && container.id === 'chatPageContent') {
+    if (typeof renderChatPage === 'function') renderChatPage();
+  }
 }
 
 // ================================================================
