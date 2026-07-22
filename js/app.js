@@ -34,36 +34,36 @@ function hideAuthGate() {
 function showAuthGate() {
   if ($('#authGate')) return;
   forum.loggedIn = false;
-  document.body.style.display = '';
+  document.body.style.display = 'block';
+  document.body.style.background = '#0b1120';
   var gate = document.createElement('div');
   gate.id = 'authGate';
-  gate.className = 'fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center px-4';
+  gate.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#0b1120;display:flex;align-items:center;justify-content:center;';
   gate.innerHTML =
-    '<div class="w-full max-w-sm text-center">' +
-      '<div class="text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-1">Void-bit</div>' +
-      '<p class="text-sm text-slate-500 mb-8">' + t('auth.tagline') + '</p>' +
-      '<div class="card p-6 text-left">' +
-        '<div class="flex gap-2 mb-5">' +
-          '<button id="gateTabLogin" class="tab-btn active flex-1 justify-center text-sm" onclick="gateSwitchTab(\'login\')">' + t('forum.login') + '</button>' +
-          '<button id="gateTabRegister" class="tab-btn flex-1 justify-center text-sm" onclick="gateSwitchTab(\'register\')">' + t('forum.register') + '</button>' +
+    '<div style="width:100%;max-width:400px;text-align:center;padding:0 16px">' +
+      '<div style="font-size:2.25rem;font-weight:800;background:linear-gradient(135deg,#00f0ff,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px">Void-bit</div>' +
+      '<p style="color:#64748b;font-size:0.875rem;margin-bottom:2rem">' + t('auth.tagline') + '</p>' +
+      '<div class="card" style="padding:1.5rem;text-align:left">' +
+        '<div style="display:flex;gap:8px;margin-bottom:1.25rem">' +
+          '<button id="gateTabLogin" class="tab-btn active" style="flex:1;justify-content:center;font-size:0.875rem" onclick="gateSwitchTab(\'login\')">' + t('forum.login') + '</button>' +
+          '<button id="gateTabRegister" class="tab-btn" style="flex:1;justify-content:center;font-size:0.875rem" onclick="gateSwitchTab(\'register\')">' + t('forum.register') + '</button>' +
         '</div>' +
-        '<div class="space-y-4">' +
-          '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.username') + '</label>' +
-            '<input type="text" id="authUsername" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.usernamePlace') + '"></div>' +
-          '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.password') + '</label>' +
-            '<input type="password" id="authPassword" maxlength="50" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.passwordPlace') + '"></div>' +
+        '<div style="display:flex;flex-direction:column;gap:16px">' +
+          '<div><label style="font-size:0.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px">' + t('forum.username') + '</label>' +
+            '<input type="text" id="authUsername" maxlength="20" style="width:100%;padding:10px 16px;border-radius:8px;background:rgba(30,41,59,0.5);border:1px solid rgba(51,65,85,0.5);font-size:0.875rem;color:#fff;outline:none;box-sizing:border-box" placeholder="' + t('forum.usernamePlace') + '"></div>' +
+          '<div><label style="font-size:0.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px">' + t('forum.password') + '</label>' +
+            '<input type="password" id="authPassword" maxlength="50" style="width:100%;padding:10px 16px;border-radius:8px;background:rgba(30,41,59,0.5);border:1px solid rgba(51,65,85,0.5);font-size:0.875rem;color:#fff;outline:none;box-sizing:border-box" placeholder="' + t('forum.passwordPlace') + '"></div>' +
           '<div id="authExtra" style="display:none">' +
-            '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.displayName') + '</label>' +
-            '<input type="text" id="authDisplayName" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.nickname') + '"></div>' +
+            '<div><label style="font-size:0.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px">' + t('forum.displayName') + '</label>' +
+            '<input type="text" id="authDisplayName" maxlength="20" style="width:100%;padding:10px 16px;border-radius:8px;background:rgba(30,41,59,0.5);border:1px solid rgba(51,65,85,0.5);font-size:0.875rem;color:#fff;outline:none;box-sizing:border-box" placeholder="' + t('forum.nickname') + '"></div>' +
           '</div>' +
-          '<button id="gateSubmitBtn" onclick="gateSubmit()" class="btn-primary w-full justify-center text-sm py-2.5">' + t('forum.login') + '</button>' +
-          '<p id="gateError" class="text-xs text-red-400 text-center hidden"></p>' +
+          '<button id="gateSubmitBtn" onclick="gateSubmit()" style="width:100%;padding:10px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#00f0ff,#3b82f6);color:#fff;font-size:0.875rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center">' + t('forum.login') + '</button>' +
+          '<p id="gateError" style="font-size:0.75rem;color:#f87171;text-align:center;display:none;margin:0"></p>' +
         '</div>' +
       '</div>' +
     '</div>';
   document.body.appendChild(gate);
   document.body.style.overflow = 'hidden';
-  if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
   var pw = $('#authPassword');
   if (pw) pw.addEventListener('keydown', function(e) { if (e.key === 'Enter') gateSubmit(); });
 }
@@ -150,7 +150,8 @@ function gateCreateSession(username, displayName, avatarUrl) {
 //  INIT — read localStorage, render everything
 // ----------------------------------------------------------------
 function init() {
-  document.body.style.display = '';
+  document.body.style.display = 'block';
+  document.body.style.background = '';
   if (!localStorage.getItem('voidbit_session')) {
     showAuthGate();
     return;
