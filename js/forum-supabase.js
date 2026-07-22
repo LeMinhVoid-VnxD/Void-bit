@@ -4,7 +4,7 @@
 // ================================================================
 
 var forum = {
-  view: 'thread-list',  // thread-list | thread-detail | user-list | dm
+  view: 'thread-list',
   threadId: null,
   threadTitle: '',
   dmUser: null,
@@ -12,7 +12,9 @@ var forum = {
   threadsLoaded: false,
   presenceChannel: null,
   onlineUsers: {},
-  myName: '',
+  myName: 'Anonymous',
+  myAvatar: '',
+  loggedIn: false,
   unsubDm: null
 };
 
@@ -23,6 +25,7 @@ function renderForum() {
   var container = $('#forumContent');
   if (!container) return;
   cleanupForum();
+  checkSession();
   forum.myName = localStorage.getItem('voidbit_forum_name') || 'Anonymous';
   forum.myAvatar = localStorage.getItem('voidbit_forum_avatar') || '';
   forum.view = 'thread-list';
@@ -30,6 +33,17 @@ function renderForum() {
   forum.dmUser = null;
   renderForumTabs(container);
   trackPresence();
+}
+
+function checkSession() {
+  forum.loggedIn = !!localStorage.getItem('voidbit_session');
+  if (forum.loggedIn) {
+    forum.myName = localStorage.getItem('voidbit_forum_name') || 'Anonymous';
+    forum.myAvatar = localStorage.getItem('voidbit_forum_avatar') || '';
+  } else {
+    forum.myName = 'Anonymous';
+    forum.myAvatar = '';
+  }
 }
 
 function renderForumTabs(container) {
@@ -78,10 +92,19 @@ function renderThreadHeader(container) {
   container.innerHTML =
     '<div class="flex items-center justify-between mb-6">' +
       '<p class="text-sm text-slate-500" id="threadCount">' + t('forum.loading') + '</p>' +
-      '<div class="flex gap-2">' +
-        '<button onclick="openProfileModal()" class="btn-secondary py-2.5 px-3 text-sm" title="' + t('forum.settings') + '">' +
-          '<i data-lucide="user" class="w-4 h-4"></i>' +
-        '</button>' +
+      '<div class="flex items-center gap-2">' +
+        (forum.loggedIn
+          ? '<span class="text-xs text-slate-500 hidden sm:inline">' + escapeHtml(forum.myName) + '</span>' +
+            '<button onclick="openProfileModal()" class="btn-secondary py-2 px-2.5 text-sm" title="' + t('forum.settings') + '">' +
+              getAvatarHtml(forum.myName, forum.myAvatar, 8) +
+            '</button>' +
+            '<button onclick="logoutUser()" class="btn-secondary py-2 px-2.5 text-sm" title="' + t('forum.logout') + '">' +
+              '<i data-lucide="log-out" class="w-4 h-4"></i>' +
+            '</button>'
+          : '<button onclick="openAuthModal()" class="btn-primary py-2.5 px-4 text-sm">' +
+              '<i data-lucide="log-in" class="w-4 h-4"></i> ' + t('forum.login') +
+            '</button>'
+        ) +
         '<button onclick="openNewThreadModal()" class="btn-primary py-2.5 px-4 text-sm">' +
           '<i data-lucide="plus" class="w-4 h-4"></i> ' + t('forum.newThread') +
         '</button>' +
@@ -236,6 +259,7 @@ function renderThreadView(container) {
 }
 
 function threadSendMessage() {
+  if (!forum.loggedIn) { openAuthModal(); return; }
   var input = $('#messageInput');
   if (!input || !input.value.trim()) return;
   var content = input.value.trim();
@@ -544,6 +568,7 @@ function closeNewThreadModal() {
 }
 
 function forumCreateThread() {
+  if (!forum.loggedIn) { closeNewThreadModal(); openAuthModal(); return; }
   var titleEl = $('#newThreadTitle');
   var msgEl = $('#newThreadMessage');
   if (!titleEl || !msgEl) return;
@@ -558,6 +583,155 @@ function forumCreateThread() {
       supabaseClient.from('threads').update({ reply_count: 1 }).eq('id', res.data.id);
     });
   });
+}
+
+// ================================================================
+//  AUTH — Login / Register
+// ================================================================
+function openAuthModal() {
+  var old = $('#authModal');
+  if (old) old.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'authModal';
+  overlay.innerHTML =
+    '<div class="modal-panel">' +
+      '<div class="flex items-center justify-between mb-5">' +
+        '<h3 class="text-lg font-bold text-white" id="authTitle">' + t('forum.login') + '</h3>' +
+        '<button onclick="closeAuthModal()" class="text-slate-500 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>' +
+      '</div>' +
+      '<div class="flex gap-2 mb-5">' +
+        '<button id="authTabLogin" class="tab-btn active" onclick="switchAuthTab(\'login\')">' + t('forum.login') + '</button>' +
+        '<button id="authTabRegister" class="tab-btn" onclick="switchAuthTab(\'register\')">' + t('forum.register') + '</button>' +
+      '</div>' +
+      '<div id="authBody">' +
+        '<div class="space-y-4">' +
+          '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.username') + '</label>' +
+            '<input type="text" id="authUsername" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.usernamePlace') + '"></div>' +
+          '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.password') + '</label>' +
+            '<input type="password" id="authPassword" maxlength="50" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.passwordPlace') + '"></div>' +
+          '<div id="authExtra" style="display:none">' +
+            '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.displayName') + '</label>' +
+            '<input type="text" id="authDisplayName" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.nickname') + '"></div>' +
+          '</div>' +
+          '<button id="authSubmitBtn" onclick="submitAuth()" class="btn-primary w-full justify-center text-sm py-2.5">' + t('forum.login') + '</button>' +
+          '<p id="authError" class="text-xs text-red-400 text-center hidden"></p>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  forum._authMode = 'login';
+  lucide.createIcons();
+}
+
+function closeAuthModal() {
+  var el = $('#authModal');
+  if (el) el.remove();
+}
+
+function switchAuthTab(mode) {
+  forum._authMode = mode;
+  var lt = $('#authTabLogin');
+  var rt = $('#authTabRegister');
+  var title = $('#authTitle');
+  var extra = $('#authExtra');
+  var btn = $('#authSubmitBtn');
+  if (lt) lt.classList.toggle('active', mode === 'login');
+  if (rt) rt.classList.toggle('active', mode === 'register');
+  if (title) title.textContent = t(mode === 'login' ? 'forum.login' : 'forum.register');
+  if (extra) extra.style.display = mode === 'register' ? '' : 'none';
+  if (btn) btn.textContent = t(mode === 'login' ? 'forum.login' : 'forum.register');
+}
+
+function submitAuth() {
+  var username = ($('#authUsername') || {}).value || '';
+  var password = ($('#authPassword') || {}).value || '';
+  var errEl = $('#authError');
+  if (!username || !password) {
+    if (errEl) { errEl.textContent = t('forum.authRequired'); errEl.classList.remove('hidden'); }
+    return;
+  }
+  if (forum._authMode === 'register') {
+    registerUser(username, password, errEl);
+  } else {
+    loginUser(username, password, errEl);
+  }
+}
+
+function hashStr(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    var ch = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + ch;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16);
+}
+
+function registerUser(username, password, errEl) {
+  var displayName = ($('#authDisplayName') || {}).value || username;
+  var passHash = hashStr(password);
+  supabaseClient.from('users').insert({
+    username: username.toLowerCase(),
+    password_hash: passHash,
+    display_name: displayName,
+    avatar_url: ''
+  }).then(function(res) {
+    if (res.error) {
+      if (res.error.message && res.error.message.indexOf('duplicate') > -1) {
+        if (errEl) { errEl.textContent = t('forum.userExists'); errEl.classList.remove('hidden'); }
+      } else {
+        if (errEl) { errEl.textContent = t('forum.authError') + ' ' + (res.error.message || ''); errEl.classList.remove('hidden'); }
+      }
+      return;
+    }
+    createSession(username, displayName, '');
+    closeAuthModal();
+    renderForum();
+  });
+}
+
+function loginUser(username, password, errEl) {
+  var passHash = hashStr(password);
+  supabaseClient.from('users').select('*').eq('username', username.toLowerCase()).single().then(function(res) {
+    if (res.error || !res.data) {
+      if (errEl) { errEl.textContent = t('forum.userNotFound'); errEl.classList.remove('hidden'); }
+      return;
+    }
+    if (res.data.password_hash !== passHash) {
+      if (errEl) { errEl.textContent = t('forum.wrongPass'); errEl.classList.remove('hidden'); }
+      return;
+    }
+    createSession(username, res.data.display_name || username, res.data.avatar_url || '');
+    closeAuthModal();
+    renderForum();
+  });
+}
+
+function createSession(username, displayName, avatarUrl) {
+  var token = hashStr(username + ':' + Date.now());
+  localStorage.setItem('voidbit_session', token);
+  localStorage.setItem('voidbit_username', username.toLowerCase());
+  localStorage.setItem('voidbit_forum_name', displayName);
+  localStorage.setItem('voidbit_forum_avatar', avatarUrl);
+  forum.loggedIn = true;
+  forum.myName = displayName;
+  forum.myAvatar = avatarUrl;
+}
+
+function logoutUser() {
+  localStorage.removeItem('voidbit_session');
+  localStorage.removeItem('voidbit_username');
+  localStorage.removeItem('voidbit_forum_name');
+  localStorage.removeItem('voidbit_forum_avatar');
+  forum.loggedIn = false;
+  forum.myName = 'Anonymous';
+  forum.myAvatar = '';
+  if (forum.presenceChannel) {
+    supabaseClient.removeChannel(forum.presenceChannel);
+    forum.presenceChannel = null;
+  }
+  renderForum();
 }
 
 // ================================================================
@@ -634,6 +808,12 @@ function saveProfile() {
   localStorage.setItem('voidbit_forum_avatar', url.trim());
   forum.myName = name.trim();
   forum.myAvatar = url.trim();
+  if (forum.loggedIn) {
+    var uname = localStorage.getItem('voidbit_username');
+    if (uname) {
+      supabaseClient.from('users').update({ display_name: name.trim(), avatar_url: url.trim() }).eq('username', uname);
+    }
+  }
   closeProfileModal();
   renderForum();
 }

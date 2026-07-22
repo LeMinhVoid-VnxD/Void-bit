@@ -37,9 +37,19 @@
 //  ALTER TABLE threads ENABLE ROW LEVEL SECURITY;
 //  ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 //  ALTER TABLE direct_messages ENABLE ROW LEVEL SECURITY;
+//  ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 //  CREATE POLICY "anon_all" ON threads FOR ALL USING (true) WITH CHECK (true);
 //  CREATE POLICY "anon_all" ON messages FOR ALL USING (true) WITH CHECK (true);
 //  CREATE POLICY "anon_all_dm" ON direct_messages FOR ALL USING (true) WITH CHECK (true);
+//  CREATE POLICY "anon_all_users" ON users FOR ALL USING (true) WITH CHECK (true);
+//
+//  CREATE TABLE users (
+//    username TEXT PRIMARY KEY,
+//    password_hash TEXT NOT NULL,
+//    display_name TEXT NOT NULL DEFAULT '',
+//    avatar_url TEXT NOT NULL DEFAULT '',
+//    created_at TIMESTAMPTZ DEFAULT now()
+//  );
 // ================================================================
 
 var SUPABASE_URL = 'https://amcuddpczwixylrlhxru.supabase.co';
