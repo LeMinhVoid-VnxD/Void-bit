@@ -265,7 +265,9 @@ function threadSendMessage() {
   var content = input.value.trim();
   input.value = '';
   var author = forum.myName;
-  supabaseClient.from('messages').insert({ thread_id: forum.threadId, author: author, content: content });
+  supabaseClient.from('messages').insert({ thread_id: forum.threadId, author: author, content: content }).then(function(res) {
+    if (res.error) console.error('Message send error:', res.error);
+  });
   supabaseClient.from('threads').select('reply_count').eq('id', forum.threadId).single().then(function(res) {
     if (!res.error && res.data) {
       supabaseClient.from('threads').update({ last_activity_at: new Date().toISOString(), reply_count: (res.data.reply_count || 0) + 1 }).eq('id', forum.threadId);
@@ -578,8 +580,10 @@ function forumCreateThread() {
   if (!title || !content) return;
   closeNewThreadModal();
   supabaseClient.from('threads').insert({ title: title, author: author, reply_count: 0 }).select().single().then(function(res) {
-    if (res.error || !res.data) return;
-    supabaseClient.from('messages').insert({ thread_id: res.data.id, author: author, content: content }).then(function() {
+    if (res.error) { console.error('Thread insert error:', res.error); alert('Lỗi: ' + res.error.message); return; }
+    if (!res.data) { console.error('No data returned'); alert('Không tạo được thread'); return; }
+    supabaseClient.from('messages').insert({ thread_id: res.data.id, author: author, content: content }).then(function(res2) {
+      if (res2.error) console.error('Message insert error:', res2.error);
       supabaseClient.from('threads').update({ reply_count: 1 }).eq('id', res.data.id);
     });
   });
