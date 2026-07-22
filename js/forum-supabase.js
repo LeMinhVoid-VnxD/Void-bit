@@ -24,6 +24,7 @@ function renderForum() {
   if (!container) return;
   cleanupForum();
   forum.myName = localStorage.getItem('voidbit_forum_name') || 'Anonymous';
+  forum.myAvatar = localStorage.getItem('voidbit_forum_avatar') || '';
   forum.view = 'thread-list';
   forum.threadId = null;
   forum.dmUser = null;
@@ -77,9 +78,14 @@ function renderThreadHeader(container) {
   container.innerHTML =
     '<div class="flex items-center justify-between mb-6">' +
       '<p class="text-sm text-slate-500" id="threadCount">' + t('forum.loading') + '</p>' +
-      '<button onclick="openNewThreadModal()" class="btn-primary py-2.5 px-4 text-sm">' +
-        '<i data-lucide="plus" class="w-4 h-4"></i> ' + t('forum.newThread') +
-      '</button>' +
+      '<div class="flex gap-2">' +
+        '<button onclick="openProfileModal()" class="btn-secondary py-2.5 px-3 text-sm" title="' + t('forum.settings') + '">' +
+          '<i data-lucide="user" class="w-4 h-4"></i>' +
+        '</button>' +
+        '<button onclick="openNewThreadModal()" class="btn-primary py-2.5 px-4 text-sm">' +
+          '<i data-lucide="plus" class="w-4 h-4"></i> ' + t('forum.newThread') +
+        '</button>' +
+      '</div>' +
     '</div>' +
     '<div id="threadList" class="space-y-2"></div>';
   lucide.createIcons();
@@ -309,7 +315,7 @@ function renderOnlineList(listEl) {
     html += '<div class="online-user" data-user="' + escapeHtml(names[i]) + '">' +
       '<div class="flex items-center gap-3 flex-1 min-w-0">' +
         '<div class="relative">' +
-          '<div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-xs font-bold text-white">' + names[i].charAt(0).toUpperCase() + '</div>' +
+          getAvatarHtml(names[i], '', 9) +
           '<div class="online-dot"></div>' +
         '</div>' +
         '<div class="min-w-0">' +
@@ -358,7 +364,7 @@ function loadRecentChats() {
       for (var j = 0; j < Math.min(5, sorted.length); j++) {
         html += '<div class="thread-card" onclick="openDM(\'' + escapeHtml(sorted[j].name) + '\')">' +
           '<div class="thread-card-left">' +
-            '<div class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0">' + sorted[j].name.charAt(0).toUpperCase() + '</div>' +
+            getAvatarHtml(sorted[j].name, '', 9) +
             '<div class="min-w-0 flex-1">' +
               '<p class="text-sm font-bold text-white truncate">' + escapeHtml(sorted[j].name) + '</p>' +
               '<p class="text-xs text-slate-500 truncate">' + escapeHtml(sorted[j].lastMsg) + '</p>' +
@@ -393,7 +399,7 @@ function renderDMHeader(container, other) {
       '</button>' +
       '<div class="flex items-center gap-3 mt-2">' +
         '<div class="relative">' +
-          '<div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-sm font-bold text-white">' + other.charAt(0).toUpperCase() + '</div>' +
+          getAvatarHtml(other, '', 10) +
           (forum.onlineUsers[other] ? '<div class="online-dot"></div>' : '') +
         '</div>' +
         '<div>' +
@@ -469,7 +475,7 @@ function buildDMCard(m) {
   var timeStr = m.created_at ? formatTime(new Date(m.created_at)) : '';
   var isMe = m.sender === forum.myName;
   return '<div class="message-card ' + (isMe ? 'dm-mine' : '') + '" ' + (isMe ? 'style="flex-direction:row-reverse"' : '') + '>' +
-    '<div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0">' + m.sender.charAt(0).toUpperCase() + '</div>' +
+    getAvatarHtml(m.sender, m.sender === forum.myName ? forum.myAvatar : '', 8) +
     '<div class="flex-1 min-w-0">' +
       '<div class="flex items-center gap-2">' +
         '<span class="text-sm font-bold text-white">' + escapeHtml(m.sender) + '</span>' +
@@ -555,6 +561,84 @@ function forumCreateThread() {
 }
 
 // ================================================================
+//  PROFILE — Nickname + Avatar URL
+// ================================================================
+function getAvatarHtml(name, url, size) {
+  size = size || 9;
+  var cls = 'w-' + size + ' h-' + size + ' rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0';
+  if (url) {
+    return '<img src="' + escapeHtml(url) + '" alt="A" class="' + cls + ' object-cover" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'" loading="lazy"><div class="' + cls + ' bg-gradient-to-br from-cyan-400 to-blue-600" style="display:none">' + name.charAt(0).toUpperCase() + '</div>';
+  }
+  return '<div class="' + cls + ' bg-gradient-to-br from-cyan-400 to-blue-600">' + name.charAt(0).toUpperCase() + '</div>';
+}
+
+function openProfileModal() {
+  var old = $('#profileModal');
+  if (old) old.remove();
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'profileModal';
+  overlay.innerHTML =
+    '<div class="modal-panel">' +
+      '<div class="flex items-center justify-between mb-5">' +
+        '<h3 class="text-lg font-bold text-white">' + t('forum.profile') + '</h3>' +
+        '<button onclick="closeProfileModal()" class="text-slate-500 hover:text-white transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>' +
+      '</div>' +
+      '<div class="space-y-4">' +
+        '<div class="flex items-center gap-4 mb-2">' +
+          '<div id="profilePreview">' + getAvatarHtml(forum.myName, forum.myAvatar, 12) + '</div>' +
+          '<div>' +
+            '<p class="text-sm font-bold text-white">' + escapeHtml(forum.myName) + '</p>' +
+            '<p class="text-xs text-slate-500">' + t('forum.profileDesc') + '</p>' +
+          '</div>' +
+        '</div>' +
+        '<div>' +
+          '<label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.nickname') + '</label>' +
+          '<input type="text" id="profileName" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" value="' + escapeHtml(forum.myName) + '">' +
+        '</div>' +
+        '<div>' +
+          '<label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.avatarUrl') + '</label>' +
+          '<input type="text" id="profileAvatar" placeholder="https://example.com/avatar.jpg" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" value="' + escapeHtml(forum.myAvatar) + '">' +
+        '</div>' +
+        '<div class="flex gap-3">' +
+          '<button onclick="closeProfileModal()" class="btn-secondary flex-1 justify-center text-sm py-2.5">' + t('forum.cancel') + '</button>' +
+          '<button onclick="saveProfile()" class="btn-primary flex-1 justify-center text-sm py-2.5">' + t('forum.save') + '</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  lucide.createIcons();
+  var nameInput = $('#profileName');
+  var avatarInput = $('#profileAvatar');
+  if (nameInput) nameInput.addEventListener('input', updateProfilePreview);
+  if (avatarInput) avatarInput.addEventListener('input', updateProfilePreview);
+}
+
+function closeProfileModal() {
+  var el = $('#profileModal');
+  if (el) el.remove();
+}
+
+function updateProfilePreview() {
+  var name = ($('#profileName') || {}).value || forum.myName;
+  var url = ($('#profileAvatar') || {}).value || '';
+  var preview = $('#profilePreview');
+  if (preview) preview.innerHTML = getAvatarHtml(name, url, 12);
+  lucide.createIcons();
+}
+
+function saveProfile() {
+  var name = ($('#profileName') || {}).value || 'Anonymous';
+  var url = ($('#profileAvatar') || {}).value || '';
+  localStorage.setItem('voidbit_forum_name', name.trim());
+  localStorage.setItem('voidbit_forum_avatar', url.trim());
+  forum.myName = name.trim();
+  forum.myAvatar = url.trim();
+  closeProfileModal();
+  renderForum();
+}
+
+// ================================================================
 //  HELPERS
 // ================================================================
 function cleanupForum() {
@@ -570,7 +654,7 @@ function buildMessageCard(m) {
   var timeStr = m.created_at ? formatTime(new Date(m.created_at)) : '';
   var initial = m.author ? m.author.charAt(0).toUpperCase() : '?';
   return '<div class="message-card">' +
-    '<div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-xs font-bold text-white shrink-0">' + initial + '</div>' +
+    getAvatarHtml(m.author, m.author === forum.myName ? forum.myAvatar : '', 8) +
     '<div class="flex-1 min-w-0">' +
       '<div class="flex items-center gap-2">' +
         '<span class="text-sm font-bold text-white">' + escapeHtml(m.author) + '</span>' +
