@@ -167,18 +167,18 @@ function renderThreadCards(threads) {
   attachThreadClicks();
 }
 
-function buildThreadCard(id, t) {
-  var timeStr = t.last_activity_at ? formatTime(new Date(t.last_activity_at)) : '';
-  var replies = (t.reply_count || 0) + ' ' + t('forum.replies');
+function buildThreadCard(id, thread) {
+  var timeStr = thread.last_activity_at ? formatTime(new Date(thread.last_activity_at)) : '';
+  var replies = (thread.reply_count || 0) + ' ' + t('forum.replies');
   return '<div class="thread-card" data-thread-id="' + id + '">' +
     '<div class="thread-card-left">' +
       '<div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">' +
         '<i data-lucide="message-square" class="w-4 h-4 text-cyan-400"></i>' +
       '</div>' +
       '<div class="min-w-0 flex-1">' +
-        '<h4 class="text-sm font-bold text-white truncate">' + escapeHtml(t.title) + '</h4>' +
+        '<h4 class="text-sm font-bold text-white truncate">' + escapeHtml(thread.title) + '</h4>' +
         '<p class="text-xs text-slate-500 mt-0.5">' +
-          '<span class="text-cyan-400 font-medium">' + escapeHtml(t.author) + '</span> · ' + replies +
+          '<span class="text-cyan-400 font-medium">' + escapeHtml(thread.author) + '</span> · ' + replies +
           (timeStr ? ' · ' + timeStr : '') +
         '</p>' +
       '</div>' +
