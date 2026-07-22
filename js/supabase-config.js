@@ -5,7 +5,8 @@
 //  1. Vào https://supabase.com → Sign in (GitHub account được)
 //  2. Tạo project → đặt tên (vd: void-bit), database password, region asia-southeast1
 //  3. Vào SQL Editor → chạy đoạn SQL bên dưới
-//  4. Vào Project Settings > API → copy URL + anon key vào đây
+//  4. Vào Database → Replication → enable Realtime cho bảng: threads, messages, direct_messages, users
+//  5. Vào Project Settings > API → copy URL + anon key vào đây
 // ================================================================
 //  SQL (chạy trong Supabase SQL Editor):
 //  -----------------------------------------

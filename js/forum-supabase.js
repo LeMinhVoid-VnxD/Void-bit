@@ -144,15 +144,26 @@ function renderThreadList(container) {
       else { listEl2.innerHTML = card + listEl2.innerHTML; }
       lucide.createIcons();
       attachThreadClicks();
-      var countEl2 = $('#threadCount');
-      if (countEl2) {
-        var cards = listEl2.querySelectorAll('.thread-card');
-        countEl2.textContent = cards.length + ' ' + t('forum.threads');
-      }
+      updateThreadCount();
+    }
+  );
+  ch.on('postgres_changes',
+    { event: 'UPDATE', schema: 'public', table: 'threads' },
+    function(payload) {
+      updateThreadReplyCount(payload.new.id, payload.new.reply_count);
     }
   );
   ch.subscribe();
   forum.channels.push(ch);
+}
+
+function updateThreadCount() {
+  var listEl2 = $('#threadList');
+  var countEl2 = $('#threadCount');
+  if (listEl2 && countEl2) {
+    var cards = listEl2.querySelectorAll('.thread-card');
+    countEl2.textContent = cards.length + ' ' + t('forum.threads');
+  }
 }
 
 function renderThreadCards(threads) {
@@ -265,14 +276,40 @@ function threadSendMessage() {
   var content = input.value.trim();
   input.value = '';
   var author = forum.myName;
+  // Show immediately in UI
+  var listEl = $('#messageList');
+  if (listEl) {
+    var emptyMsg = listEl.querySelector('.text-center.py-12');
+    if (emptyMsg) emptyMsg.remove();
+    listEl.innerHTML += buildMessageCard({ author: author, content: content, created_at: new Date().toISOString() });
+    var wrap = $('#messageWrap');
+    if (wrap) wrap.scrollTop = wrap.scrollHeight;
+    lucide.createIcons();
+  }
+  // Save to DB
   supabaseClient.from('messages').insert({ thread_id: forum.threadId, author: author, content: content }).then(function(res) {
     if (res.error) console.error('Message send error:', res.error);
   });
+  // Update reply count
   supabaseClient.from('threads').select('reply_count').eq('id', forum.threadId).single().then(function(res) {
     if (!res.error && res.data) {
-      supabaseClient.from('threads').update({ last_activity_at: new Date().toISOString(), reply_count: (res.data.reply_count || 0) + 1 }).eq('id', forum.threadId);
+      var newCount = (res.data.reply_count || 0) + 1;
+      supabaseClient.from('threads').update({ last_activity_at: new Date().toISOString(), reply_count: newCount }).eq('id', forum.threadId);
+      // Update thread card count in the list
+      updateThreadReplyCount(forum.threadId, newCount);
     }
   });
+}
+
+function updateThreadReplyCount(threadId, count) {
+  var card = document.querySelector('.thread-card[data-thread-id="' + threadId + '"]');
+  if (!card) return;
+  var p = card.querySelector('p.text-xs.text-slate-500');
+  if (p) {
+    var parts = p.innerHTML.split(' · ');
+    if (parts.length >= 2) parts[1] = count + ' ' + t('forum.replies');
+    p.innerHTML = parts.join(' · ');
+  }
 }
 
 function threadGoBack() {
@@ -517,10 +554,23 @@ function sendDM() {
   if (!input || !input.value.trim()) return;
   var content = input.value.trim();
   input.value = '';
+  // Show immediately in UI
+  var listEl = $('#dmList');
+  if (listEl) {
+    var emptyMsg = listEl.querySelector('.text-center.py-12');
+    if (emptyMsg) emptyMsg.remove();
+    listEl.innerHTML += buildDMCard({ sender: forum.myName, recipient: forum.dmUser, content: content, created_at: new Date().toISOString() });
+    var wrap = $('#dmWrap');
+    if (wrap) wrap.scrollTop = wrap.scrollHeight;
+    lucide.createIcons();
+  }
+  // Save to DB
   supabaseClient.from('direct_messages').insert({
     sender: forum.myName,
     recipient: forum.dmUser,
     content: content
+  }).then(function(res) {
+    if (res.error) console.error('DM send error:', res.error);
   });
 }
 
@@ -579,13 +629,26 @@ function forumCreateThread() {
   var author = forum.myName;
   if (!title || !content) return;
   closeNewThreadModal();
-  supabaseClient.from('threads').insert({ title: title, author: author, reply_count: 0 }).select().single().then(function(res) {
+  supabaseClient.from('threads').insert({ title: title, author: author, reply_count: 1 }).select().single().then(function(res) {
     if (res.error) { console.error('Thread insert error:', res.error); alert('Lỗi: ' + res.error.message); return; }
     if (!res.data) { console.error('No data returned'); alert('Không tạo được thread'); return; }
     supabaseClient.from('messages').insert({ thread_id: res.data.id, author: author, content: content }).then(function(res2) {
       if (res2.error) console.error('Message insert error:', res2.error);
-      supabaseClient.from('threads').update({ reply_count: 1 }).eq('id', res.data.id);
     });
+    // Add thread card immediately
+    var listEl = $('#threadList');
+    if (listEl) {
+      var emptyMsg = listEl.querySelector('.text-center.py-16');
+      if (emptyMsg) listEl.innerHTML = '';
+      listEl.innerHTML = buildThreadCard(res.data.id, { title: title, author: author, reply_count: 1, last_activity_at: new Date().toISOString() }) + listEl.innerHTML;
+      lucide.createIcons();
+      attachThreadClicks();
+    }
+    var countEl = $('#threadCount');
+    if (countEl) {
+      var cards = listEl ? listEl.querySelectorAll('.thread-card').length : 0;
+      countEl.textContent = cards + ' ' + t('forum.threads');
+    }
   });
 }
 
