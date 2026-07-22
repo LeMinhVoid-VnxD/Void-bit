@@ -724,14 +724,11 @@ function logoutUser() {
   localStorage.removeItem('voidbit_username');
   localStorage.removeItem('voidbit_forum_name');
   localStorage.removeItem('voidbit_forum_avatar');
-  forum.loggedIn = false;
-  forum.myName = 'Anonymous';
-  forum.myAvatar = '';
   if (forum.presenceChannel) {
     supabaseClient.removeChannel(forum.presenceChannel);
     forum.presenceChannel = null;
   }
-  renderForum();
+  location.reload();
 }
 
 // ================================================================

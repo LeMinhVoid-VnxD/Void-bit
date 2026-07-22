@@ -28,37 +28,40 @@ let streakData   = { count: 0, lastDate: '' };
 function hideAuthGate() {
   var gate = $('#authGate');
   if (gate) gate.remove();
+  document.body.style.overflow = '';
 }
 
 function showAuthGate() {
   if ($('#authGate')) return;
   forum.loggedIn = false;
-  document.body.innerHTML =
-    '<div id="authGate" class="flex items-center justify-center min-h-screen bg-slate-950 px-4">' +
-      '<div class="w-full max-w-sm text-center">' +
-        '<div class="text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-1">Void-bit</div>' +
-        '<p class="text-sm text-slate-500 mb-8">' + t('auth.tagline') + '</p>' +
-        '<div class="card p-6 text-left">' +
-          '<div class="flex gap-2 mb-5">' +
-            '<button id="gateTabLogin" class="tab-btn active flex-1 justify-center text-sm" onclick="gateSwitchTab(\'login\')">' + t('forum.login') + '</button>' +
-            '<button id="gateTabRegister" class="tab-btn flex-1 justify-center text-sm" onclick="gateSwitchTab(\'register\')">' + t('forum.register') + '</button>' +
+  document.body.style.display = '';
+  var gate = document.createElement('div');
+  gate.id = 'authGate';
+  gate.className = 'fixed inset-0 z-[9999] bg-slate-950 flex items-center justify-center px-4';
+  gate.innerHTML =
+    '<div class="w-full max-w-sm text-center">' +
+      '<div class="text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-1">Void-bit</div>' +
+      '<p class="text-sm text-slate-500 mb-8">' + t('auth.tagline') + '</p>' +
+      '<div class="card p-6 text-left">' +
+        '<div class="flex gap-2 mb-5">' +
+          '<button id="gateTabLogin" class="tab-btn active flex-1 justify-center text-sm" onclick="gateSwitchTab(\'login\')">' + t('forum.login') + '</button>' +
+          '<button id="gateTabRegister" class="tab-btn flex-1 justify-center text-sm" onclick="gateSwitchTab(\'register\')">' + t('forum.register') + '</button>' +
+        '</div>' +
+        '<div class="space-y-4">' +
+          '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.username') + '</label>' +
+            '<input type="text" id="authUsername" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.usernamePlace') + '"></div>' +
+          '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.password') + '</label>' +
+            '<input type="password" id="authPassword" maxlength="50" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.passwordPlace') + '"></div>' +
+          '<div id="authExtra" style="display:none">' +
+            '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.displayName') + '</label>' +
+            '<input type="text" id="authDisplayName" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.nickname') + '"></div>' +
           '</div>' +
-          '<div class="space-y-4">' +
-            '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.username') + '</label>' +
-              '<input type="text" id="authUsername" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.usernamePlace') + '"></div>' +
-            '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.password') + '</label>' +
-              '<input type="password" id="authPassword" maxlength="50" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.passwordPlace') + '"></div>' +
-            '<div id="authExtra" style="display:none">' +
-              '<div><label class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1.5">' + t('forum.displayName') + '</label>' +
-              '<input type="text" id="authDisplayName" maxlength="20" class="w-full px-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/40 transition-colors" placeholder="' + t('forum.nickname') + '"></div>' +
-            '</div>' +
-            '<button id="gateSubmitBtn" onclick="gateSubmit()" class="btn-primary w-full justify-center text-sm py-2.5">' + t('forum.login') + '</button>' +
-            '<p id="gateError" class="text-xs text-red-400 text-center hidden"></p>' +
-          '</div>' +
+          '<button id="gateSubmitBtn" onclick="gateSubmit()" class="btn-primary w-full justify-center text-sm py-2.5">' + t('forum.login') + '</button>' +
+          '<p id="gateError" class="text-xs text-red-400 text-center hidden"></p>' +
         '</div>' +
       '</div>' +
     '</div>';
-  forum._authMode = 'login';
+  document.body.appendChild(gate);
   document.body.style.overflow = 'hidden';
   if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
   var pw = $('#authPassword');
@@ -147,7 +150,7 @@ function gateCreateSession(username, displayName, avatarUrl) {
 //  INIT — read localStorage, render everything
 // ----------------------------------------------------------------
 function init() {
-  // Check auth first
+  document.body.style.display = '';
   if (!localStorage.getItem('voidbit_session')) {
     showAuthGate();
     return;
