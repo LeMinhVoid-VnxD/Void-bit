@@ -281,7 +281,7 @@ function startPolling(type, id) {
   forum._pollTimer = setInterval(function() {
     if (type === 'thread') pollThreadMessages(id);
     else if (type === 'dm') pollDMMessages(forum.dmUser);
-  }, 100);
+  }, 1000);
 }
 
 function stopPolling() {
@@ -353,26 +353,23 @@ function threadSendMessage() {
   var content = input.value.trim();
   input.value = '';
   var author = forum.myName;
-  // Show immediately in UI
-  var listEl = $('#messageList');
-  if (listEl) {
-    var emptyMsg = listEl.querySelector('.text-center.py-12');
-    if (emptyMsg) emptyMsg.remove();
-    listEl.innerHTML += buildMessageCard({ author: author, content: content, created_at: new Date().toISOString() });
-    var wrap = $('#messageWrap');
-    if (wrap) wrap.scrollTop = wrap.scrollHeight;
-    lucide.createIcons();
-  }
-  // Save to DB
-  supabaseClient.from('messages').insert({ thread_id: forum.threadId, author: author, content: content }).then(function(res) {
-    if (res.error) console.error('Message send error:', res.error);
+  // Save to DB, then append with real ID
+  supabaseClient.from('messages').insert({ thread_id: forum.threadId, author: author, content: content }).select().single().then(function(res) {
+    if (res.error) { console.error('Message send error:', res.error); return; }
+    var listEl = $('#messageList');
+    if (listEl) {
+      var emptyMsg = listEl.querySelector('.text-center.py-12');
+      if (emptyMsg) emptyMsg.remove();
+      listEl.innerHTML += buildMessageCard(res.data);
+      var wrap = $('#messageWrap');
+      if (wrap) wrap.scrollTop = wrap.scrollHeight;
+      lucide.createIcons();
+    }
   });
-  // Update reply count
   supabaseClient.from('threads').select('reply_count').eq('id', forum.threadId).single().then(function(res) {
     if (!res.error && res.data) {
       var newCount = (res.data.reply_count || 0) + 1;
       supabaseClient.from('threads').update({ last_activity_at: new Date().toISOString(), reply_count: newCount }).eq('id', forum.threadId);
-      // Update thread card count in the list
       updateThreadReplyCount(forum.threadId, newCount);
     }
   });
@@ -676,23 +673,22 @@ function sendDM() {
   if (!input || !input.value.trim()) return;
   var content = input.value.trim();
   input.value = '';
-  // Show immediately in UI
-  var listEl = $('#dmList');
-  if (listEl) {
-    var emptyMsg = listEl.querySelector('.text-center.py-12');
-    if (emptyMsg) emptyMsg.remove();
-    listEl.innerHTML += buildDMCard({ sender: forum.myName, recipient: forum.dmUser, content: content, created_at: new Date().toISOString() });
-    var wrap = $('#dmWrap');
-    if (wrap) wrap.scrollTop = wrap.scrollHeight;
-    lucide.createIcons();
-  }
-  // Save to DB
+  // Save to DB, then append with real ID
   supabaseClient.from('direct_messages').insert({
     sender: forum.myName,
     recipient: forum.dmUser,
     content: content
-  }).then(function(res) {
-    if (res.error) console.error('DM send error:', res.error);
+  }).select().single().then(function(res) {
+    if (res.error) { console.error('DM send error:', res.error); return; }
+    var listEl = $('#dmList');
+    if (listEl) {
+      var emptyMsg = listEl.querySelector('.text-center.py-12');
+      if (emptyMsg) emptyMsg.remove();
+      listEl.innerHTML += buildDMCard(res.data);
+      var wrap = $('#dmWrap');
+      if (wrap) wrap.scrollTop = wrap.scrollHeight;
+      lucide.createIcons();
+    }
   });
 }
 
