@@ -64,12 +64,17 @@ function renderChatPage() {
       '<p class="text-sm text-slate-400 mt-1">' + t('chat.subtitle') + '</p>' +
     '</div>' +
     '<div id="onlineList" class="space-y-2 mb-8"></div>' +
+    '<div class="mb-5">' +
+      '<h4 class="text-sm font-bold text-white mb-3">' + t('chat.allUsers') + '</h4>' +
+      '<div id="allUsersList" class="space-y-2"></div>' +
+    '</div>' +
     '<div>' +
       '<h4 class="text-sm font-bold text-white mb-3">' + t('chat.recent') + '</h4>' +
       '<div id="recentChats" class="space-y-2"></div>' +
     '</div>';
   lucide.createIcons();
   renderOnlineList($('#onlineList'));
+  loadAllUsers();
   loadRecentChats();
   trackPresence();
 }

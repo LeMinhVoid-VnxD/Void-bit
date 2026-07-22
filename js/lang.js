@@ -175,6 +175,8 @@ var LANG = {
     'chat.noRecent':       'No conversations yet.',
     'chat.presence':       'Set your display name in Settings to chat.',
     'chat.subtitle':       'Message other competitive programmers in real time.',
+    'chat.allUsers':       'All Users',
+    'chat.noOtherUsers':   'No other users yet. Share the site!',
 
     // Footer
     'footer.brand':   'Zero to Hero in Competitive Programming. Master algorithms, conquer contests.',
@@ -351,6 +353,8 @@ var LANG = {
     'chat.noRecent':       'Chưa có hội thoại nào.',
     'chat.presence':       'Đặt tên hiển thị để chat.',
     'chat.subtitle':       'Nhắn tin trực tiếp với các lập trình viên khác trong thời gian thực.',
+    'chat.allUsers':       'Tất cả người dùng',
+    'chat.noOtherUsers':   'Chưa có người dùng khác. Chia sẻ trang web nhé!',
 
     // Footer
     'footer.brand':   'Từ số 0 đến anh hùng trong Lập trình thi đấu. Làm chủ thuật toán, chinh phục các kỳ thi.',

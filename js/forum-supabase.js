@@ -355,14 +355,19 @@ function renderUserList(container) {
     '<div class="flex items-center justify-between mb-5">' +
       '<p class="text-sm text-slate-500">' + t('chat.online') + '</p>' +
     '</div>' +
-    '<div id="onlineList" class="space-y-2"></div>' +
-    '<div class="mt-8">' +
+    '<div id="onlineList" class="space-y-2 mb-8"></div>' +
+    '<div class="mb-5">' +
+      '<h4 class="text-sm font-bold text-white mb-3">' + t('chat.allUsers') + '</h4>' +
+      '<div id="allUsersList" class="space-y-2"></div>' +
+    '</div>' +
+    '<div>' +
       '<h4 class="text-sm font-bold text-white mb-3">' + t('chat.recent') + '</h4>' +
       '<div id="recentChats" class="space-y-2"></div>' +
     '</div>';
   lucide.createIcons();
   var listEl = $('#onlineList');
   renderOnlineList(listEl);
+  loadAllUsers();
   loadRecentChats();
 }
 
@@ -438,6 +443,39 @@ function loadRecentChats() {
       container.innerHTML = html;
       lucide.createIcons();
     });
+}
+
+function loadAllUsers() {
+  var container = $('#allUsersList');
+  if (!container) return;
+  supabaseClient.from('users').select('username, display_name, avatar_url').then(function(res) {
+    if (res.error || !res.data) {
+      container.innerHTML = '<p class="text-xs text-slate-600 text-center py-4">Error loading users.</p>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < res.data.length; i++) {
+      var u = res.data[i];
+      if (u.username === forum.myName.toLowerCase()) continue;
+      var displayName = u.display_name || u.username;
+      html += '<div class="thread-card" onclick="openDM(\'' + escapeHtml(u.username) + '\')">' +
+        '<div class="thread-card-left">' +
+          getAvatarHtml(displayName, u.avatar_url || '', 9) +
+          '<div class="min-w-0 flex-1">' +
+            '<p class="text-sm font-bold text-white truncate">' + escapeHtml(displayName) + '</p>' +
+            '<p class="text-[10px] text-slate-500">@' + escapeHtml(u.username) + '</p>' +
+          '</div>' +
+        '</div>' +
+        '<i data-lucide="chevron-right" class="w-4 h-4 text-slate-600 shrink-0"></i>' +
+      '</div>';
+    }
+    if (res.data.length <= 1) {
+      container.innerHTML = '<p class="text-xs text-slate-600 text-center py-4">' + t('chat.noOtherUsers') + '</p>';
+      return;
+    }
+    container.innerHTML = html;
+    lucide.createIcons();
+  });
 }
 
 // ================================================================
