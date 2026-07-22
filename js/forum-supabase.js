@@ -277,15 +277,9 @@ function renderThreadView(container) {
 }
 
 function startPolling(type, id) {
-  stopPolling();
-  forum._pollTimer = setInterval(function() {
-    if (type === 'thread') pollThreadMessages(id);
-    else if (type === 'dm') pollDMMessages(forum.dmUser);
-  }, 1000);
-}
-
-function stopPolling() {
-  if (forum._pollTimer) { clearInterval(forum._pollTimer); forum._pollTimer = null; }
+  // Polling disabled — use Supabase Realtime instead.
+  // To enable realtime, go to Supabase Dashboard → Database → Replication
+  // and enable Realtime for tables: threads, messages, direct_messages.
 }
 
 function pollThreadMessages(threadId) {
@@ -1013,7 +1007,6 @@ function saveProfile() {
 //  HELPERS
 // ================================================================
 function cleanupForum() {
-  stopPolling();
   for (var i = 0; i < forum.channels.length; i++) {
     supabaseClient.removeChannel(forum.channels[i]);
   }
