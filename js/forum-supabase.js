@@ -281,7 +281,7 @@ function startPolling(type, id) {
   forum._pollTimer = setInterval(function() {
     if (type === 'thread') pollThreadMessages(id);
     else if (type === 'dm') pollDMMessages(forum.dmUser);
-  }, 3000);
+  }, 100);
 }
 
 function stopPolling() {
