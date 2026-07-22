@@ -48,11 +48,18 @@
 //  ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 //
 //  DO $$ BEGIN
-//    CREATE POLICY IF NOT EXISTS "anon_all" ON threads FOR ALL USING (true) WITH CHECK (true);
-//    CREATE POLICY IF NOT EXISTS "anon_all" ON messages FOR ALL USING (true) WITH CHECK (true);
-//    CREATE POLICY IF NOT EXISTS "anon_all_dm" ON direct_messages FOR ALL USING (true) WITH CHECK (true);
-//    CREATE POLICY IF NOT EXISTS "anon_all_users" ON users FOR ALL USING (true) WITH CHECK (true);
-//  EXCEPTION WHEN duplicate_object THEN null;
+//    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'anon_all' AND tablename = 'threads') THEN
+//      CREATE POLICY "anon_all" ON threads FOR ALL USING (true) WITH CHECK (true);
+//    END IF;
+//    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'anon_all' AND tablename = 'messages') THEN
+//      CREATE POLICY "anon_all" ON messages FOR ALL USING (true) WITH CHECK (true);
+//    END IF;
+//    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'anon_all_dm' AND tablename = 'direct_messages') THEN
+//      CREATE POLICY "anon_all_dm" ON direct_messages FOR ALL USING (true) WITH CHECK (true);
+//    END IF;
+//    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'anon_all_users' AND tablename = 'users') THEN
+//      CREATE POLICY "anon_all_users" ON users FOR ALL USING (true) WITH CHECK (true);
+//    END IF;
 //  END $$;
 // ================================================================
 
