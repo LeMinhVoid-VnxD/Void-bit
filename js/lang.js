@@ -19,6 +19,9 @@ var LANG = {
     'nav.lessons':      'Lessons',
     'nav.forum':        'Forum',
 
+    // Auth
+    'auth.tagline':     'Sign in to start learning Competitive Programming',
+
     // Hero
     'hero.badge':       'The Ultimate CP Learning Platform',
     'hero.title.line1': 'Void-bit:',
@@ -190,6 +193,9 @@ var LANG = {
     'nav.roadmap':      'Lộ trình',
     'nav.lessons':      'Bài giảng',
     'nav.forum':        'Diễn đàn',
+
+    // Auth
+    'auth.tagline':     'Đăng nhập để bắt đầu học Lập trình thi đấu',
 
     // Hero
     'hero.badge':       'Nền tảng học CP tối ưu',
