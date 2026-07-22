@@ -444,7 +444,7 @@ function loadRecentChats() {
 //  CHAT — Direct Messages
 // ================================================================
 function openDM(otherUser) {
-  var body = $('#forumBody');
+  var body = $('#forumBody') || $('#chatPageContent');
   if (!body) return;
   if (forum.unsubDm) forum.unsubDm();
   forum.view = 'dm';
@@ -576,8 +576,12 @@ function sendDM() {
 
 function dmGoBack() {
   if (forum.unsubDm) { forum.unsubDm(); forum.unsubDm = null; }
-  // Also re-render user list to update recent chats
-  renderUserList($('#forumBody'));
+  var container = $('#forumBody') || $('#chatPageContent');
+  if (container && container.id === 'chatPageContent' && typeof renderChatPage === 'function') {
+    renderChatPage();
+  } else {
+    renderUserList($('#forumBody'));
+  }
 }
 
 // ================================================================
