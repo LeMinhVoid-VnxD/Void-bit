@@ -85,7 +85,7 @@ function gateSubmit() {
   var password = ($('#authPassword') || {}).value || '';
   var errEl = $('#gateError');
   if (!username || !password) {
-    if (errEl) { errEl.textContent = t('forum.authRequired'); errEl.classList.remove('hidden'); }
+    if (errEl) { errEl.textContent = t('forum.authRequired'); errEl.style.display = ''; }
     return;
   }
   if (forum._authMode === 'register') {
@@ -106,9 +106,9 @@ function gateRegister(username, password, errEl) {
   }).then(function(res) {
     if (res.error) {
       if (res.error.message && res.error.message.indexOf('duplicate') > -1) {
-        if (errEl) { errEl.textContent = t('forum.userExists'); errEl.classList.remove('hidden'); }
+        if (errEl) { errEl.textContent = t('forum.userExists'); errEl.style.display = ''; }
       } else {
-        if (errEl) { errEl.textContent = t('forum.authError') + ' ' + (res.error.message || ''); errEl.classList.remove('hidden'); }
+        if (errEl) { errEl.textContent = t('forum.authError') + ' ' + (res.error.message || ''); errEl.style.display = ''; }
       }
       return;
     }
@@ -122,11 +122,11 @@ function gateLogin(username, password, errEl) {
   var passHash = hashStr(password);
   supabaseClient.from('users').select('*').eq('username', username.toLowerCase()).single().then(function(res) {
     if (res.error || !res.data) {
-      if (errEl) { errEl.textContent = t('forum.userNotFound'); errEl.classList.remove('hidden'); }
+      if (errEl) { errEl.textContent = t('forum.userNotFound'); errEl.style.display = ''; }
       return;
     }
     if (res.data.password_hash !== passHash) {
-      if (errEl) { errEl.textContent = t('forum.wrongPass'); errEl.classList.remove('hidden'); }
+      if (errEl) { errEl.textContent = t('forum.wrongPass'); errEl.style.display = ''; }
       return;
     }
     gateCreateSession(username, res.data.display_name || username, res.data.avatar_url || '');
@@ -169,6 +169,7 @@ function renderNavProfile() {
 //  INIT — read localStorage, render everything
 // ----------------------------------------------------------------
 function init() {
+  if (typeof PAGE_TYPE !== 'undefined') return;
   document.body.style.display = 'block';
   document.body.style.background = '';
   if (!localStorage.getItem('voidbit_session')) {
