@@ -273,6 +273,77 @@ function renderThreadView(container) {
     input.addEventListener('keydown', function(e) { if (e.key === 'Enter') threadSendMessage(); });
     setTimeout(function() { input.focus(); }, 100);
   }
+  startPolling('thread', forum.threadId);
+}
+
+function startPolling(type, id) {
+  stopPolling();
+  forum._pollTimer = setInterval(function() {
+    if (type === 'thread') pollThreadMessages(id);
+    else if (type === 'dm') pollDMMessages(forum.dmUser);
+  }, 3000);
+}
+
+function stopPolling() {
+  if (forum._pollTimer) { clearInterval(forum._pollTimer); forum._pollTimer = null; }
+}
+
+function pollThreadMessages(threadId) {
+  var listEl = $('#messageList');
+  if (!listEl) return;
+  var lastMsg = listEl.lastElementChild;
+  var lastId = lastMsg ? lastMsg.getAttribute('data-msg-id') : null;
+  supabaseClient.from('messages').select('id,author,content,created_at').eq('thread_id', threadId).order('created_at', { ascending: true }).then(function(res) {
+    if (res.error || !res.data || res.data.length === 0) return;
+    var currentIds = {};
+    var items = listEl.querySelectorAll('.message-card');
+    for (var i = 0; i < items.length; i++) {
+      currentIds[items[i].getAttribute('data-msg-id')] = true;
+    }
+    var added = false;
+    for (var i = 0; i < res.data.length; i++) {
+      var m = res.data[i];
+      if (!currentIds[m.id]) {
+        listEl.innerHTML += buildMessageCard(m);
+        added = true;
+      }
+    }
+    if (added) {
+      var wrap = $('#messageWrap');
+      if (wrap) wrap.scrollTop = wrap.scrollHeight;
+      lucide.createIcons();
+    }
+  });
+}
+
+function pollDMMessages(other) {
+  var listEl = $('#dmList');
+  if (!listEl) return;
+  supabaseClient.from('direct_messages')
+    .select('*')
+    .or('and(sender.eq.' + forum.myName + ',recipient.eq.' + other + '),and(sender.eq.' + other + ',recipient.eq.' + forum.myName + ')')
+    .order('created_at', { ascending: true })
+    .then(function(res) {
+      if (res.error || !res.data || res.data.length === 0) return;
+      var currentIds = {};
+      var items = listEl.querySelectorAll('.message-card');
+      for (var i = 0; i < items.length; i++) {
+        currentIds[items[i].getAttribute('data-msg-id')] = true;
+      }
+      var added = false;
+      for (var i = 0; i < res.data.length; i++) {
+        var m = res.data[i];
+        if (!currentIds[m.id]) {
+          listEl.innerHTML += buildDMCard(m);
+          added = true;
+        }
+      }
+      if (added) {
+        var wrap = $('#dmWrap');
+        if (wrap) wrap.scrollTop = wrap.scrollHeight;
+        lucide.createIcons();
+      }
+    });
 }
 
 function threadSendMessage() {
@@ -582,12 +653,13 @@ function subscribeDMMessages(container, other) {
     if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.warn('Realtime DM:', status, err);
   });
   forum.unsubDm = function() { supabaseClient.removeChannel(ch); };
+  startPolling('dm', other);
 }
 
 function buildDMCard(m) {
   var timeStr = m.created_at ? formatTime(new Date(m.created_at)) : '';
   var isMe = m.sender === forum.myName;
-  return '<div class="message-card ' + (isMe ? 'dm-mine' : '') + '" ' + (isMe ? 'style="flex-direction:row-reverse"' : '') + '>' +
+  return '<div class="message-card ' + (isMe ? 'dm-mine' : '') + '" data-msg-id="' + (m.id || '') + '" ' + (isMe ? 'style="flex-direction:row-reverse"' : '') + '>' +
     getAvatarHtml(m.sender, m.sender === forum.myName ? forum.myAvatar : '', 8) +
     '<div class="flex-1 min-w-0">' +
       '<div class="flex items-center gap-2">' +
@@ -945,6 +1017,7 @@ function saveProfile() {
 //  HELPERS
 // ================================================================
 function cleanupForum() {
+  stopPolling();
   for (var i = 0; i < forum.channels.length; i++) {
     supabaseClient.removeChannel(forum.channels[i]);
   }
@@ -955,8 +1028,7 @@ function cleanupForum() {
 
 function buildMessageCard(m) {
   var timeStr = m.created_at ? formatTime(new Date(m.created_at)) : '';
-  var initial = m.author ? m.author.charAt(0).toUpperCase() : '?';
-  return '<div class="message-card">' +
+  return '<div class="message-card" data-msg-id="' + (m.id || '') + '">' +
     getAvatarHtml(m.author, m.author === forum.myName ? forum.myAvatar : '', 8) +
     '<div class="flex-1 min-w-0">' +
       '<div class="flex items-center gap-2">' +
