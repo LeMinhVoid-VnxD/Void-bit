@@ -148,14 +148,21 @@ function gateCreateSession(username, displayName, avatarUrl) {
 
 function renderNavProfile() {
   var badge = $('#navUserBadge');
-  if (!badge) return;
+  var avatarBtn = $('#navAvatarBtn');
+  if (!badge || !avatarBtn) return;
   if (!forum.loggedIn) {
     badge.style.display = 'none';
+    avatarBtn.textContent = '?';
     return;
   }
   badge.style.display = 'flex';
   badge.innerHTML = getAvatarHtml(forum.myName, forum.myAvatar, 7) +
     '<span class="text-xs text-slate-400 hidden sm:inline max-w-[100px] truncate">' + escapeHtml(forum.myName) + '</span>';
+  if (forum.myAvatar) {
+    avatarBtn.innerHTML = '<img src="' + escapeHtml(forum.myAvatar) + '" alt="" class="w-full h-full rounded-full object-cover" onerror="this.remove();this.parentElement.textContent=\'&#' + forum.myName.charCodeAt(0) + ';\'" loading="lazy">';
+  } else {
+    avatarBtn.textContent = forum.myName.charAt(0).toUpperCase();
+  }
 }
 
 // ----------------------------------------------------------------
