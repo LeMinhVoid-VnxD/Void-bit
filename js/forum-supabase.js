@@ -136,7 +136,7 @@ function renderThreadList(container) {
   ch.on('postgres_changes',
     { event: 'INSERT', schema: 'public', table: 'threads' },
     function(payload) {
-      if (!forum.threadsLoaded) return;
+      if (!forum.threadsLoaded || payload.new.author === forum.myName) return;
       var listEl2 = $('#threadList');
       if (!listEl2) return;
       var card = buildThreadCard(payload.new.id, payload.new);
@@ -252,6 +252,7 @@ function renderThreadView(container) {
   ch.on('postgres_changes',
     { event: 'INSERT', schema: 'public', table: 'messages', filter: 'thread_id=eq.' + forum.threadId },
     function(payload) {
+      if (payload.new.author === forum.myName) return;
       var listEl2 = $('#messageList');
       if (!listEl2) return;
       var emptyMsg = listEl2.querySelector('.text-center.py-12');
@@ -564,7 +565,8 @@ function subscribeDMMessages(container, other) {
     { event: 'INSERT', schema: 'public', table: 'direct_messages' },
     function(payload) {
       var msg = payload.new;
-      if ((msg.sender === forum.myName && msg.recipient === other) || (msg.sender === other && msg.recipient === forum.myName)) {
+      if (msg.sender === forum.myName) return;
+      if ((msg.sender === other && msg.recipient === forum.myName)) {
         var listEl2 = $('#dmList');
         if (!listEl2) return;
         var emptyMsg = listEl2.querySelector('.text-center.py-12');
