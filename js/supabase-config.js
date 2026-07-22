@@ -9,7 +9,7 @@
 // ================================================================
 //  SQL (chạy trong Supabase SQL Editor):
 //  -----------------------------------------
-//  CREATE TABLE threads (
+//  CREATE TABLE IF NOT EXISTS threads (
 //    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 //    title TEXT NOT NULL,
 //    author TEXT NOT NULL DEFAULT 'Anonymous',
@@ -18,7 +18,7 @@
 //    reply_count INT DEFAULT 0
 //  );
 //
-//  CREATE TABLE messages (
+//  CREATE TABLE IF NOT EXISTS messages (
 //    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 //    thread_id UUID REFERENCES threads(id) ON DELETE CASCADE,
 //    author TEXT NOT NULL DEFAULT 'Anonymous',
@@ -26,7 +26,7 @@
 //    created_at TIMESTAMPTZ DEFAULT now()
 //  );
 //
-//  CREATE TABLE direct_messages (
+//  CREATE TABLE IF NOT EXISTS direct_messages (
 //    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 //    sender TEXT NOT NULL,
 //    recipient TEXT NOT NULL,
@@ -34,22 +34,26 @@
 //    created_at TIMESTAMPTZ DEFAULT now()
 //  );
 //
-//  ALTER TABLE threads ENABLE ROW LEVEL SECURITY;
-//  ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-//  ALTER TABLE direct_messages ENABLE ROW LEVEL SECURITY;
-//  ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-//  CREATE POLICY "anon_all" ON threads FOR ALL USING (true) WITH CHECK (true);
-//  CREATE POLICY "anon_all" ON messages FOR ALL USING (true) WITH CHECK (true);
-//  CREATE POLICY "anon_all_dm" ON direct_messages FOR ALL USING (true) WITH CHECK (true);
-//  CREATE POLICY "anon_all_users" ON users FOR ALL USING (true) WITH CHECK (true);
-//
-//  CREATE TABLE users (
+//  CREATE TABLE IF NOT EXISTS users (
 //    username TEXT PRIMARY KEY,
 //    password_hash TEXT NOT NULL,
 //    display_name TEXT NOT NULL DEFAULT '',
 //    avatar_url TEXT NOT NULL DEFAULT '',
 //    created_at TIMESTAMPTZ DEFAULT now()
 //  );
+//
+//  ALTER TABLE threads ENABLE ROW LEVEL SECURITY;
+//  ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+//  ALTER TABLE direct_messages ENABLE ROW LEVEL SECURITY;
+//  ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+//
+//  DO $$ BEGIN
+//    CREATE POLICY IF NOT EXISTS "anon_all" ON threads FOR ALL USING (true) WITH CHECK (true);
+//    CREATE POLICY IF NOT EXISTS "anon_all" ON messages FOR ALL USING (true) WITH CHECK (true);
+//    CREATE POLICY IF NOT EXISTS "anon_all_dm" ON direct_messages FOR ALL USING (true) WITH CHECK (true);
+//    CREATE POLICY IF NOT EXISTS "anon_all_users" ON users FOR ALL USING (true) WITH CHECK (true);
+//  EXCEPTION WHEN duplicate_object THEN null;
+//  END $$;
 // ================================================================
 
 var SUPABASE_URL = 'https://amcuddpczwixylrlhxru.supabase.co';
