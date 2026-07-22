@@ -26,10 +26,20 @@
 //    created_at TIMESTAMPTZ DEFAULT now()
 //  );
 //
+//  CREATE TABLE direct_messages (
+//    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+//    sender TEXT NOT NULL,
+//    recipient TEXT NOT NULL,
+//    content TEXT NOT NULL,
+//    created_at TIMESTAMPTZ DEFAULT now()
+//  );
+//
 //  ALTER TABLE threads ENABLE ROW LEVEL SECURITY;
 //  ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+//  ALTER TABLE direct_messages ENABLE ROW LEVEL SECURITY;
 //  CREATE POLICY "anon_all" ON threads FOR ALL USING (true) WITH CHECK (true);
 //  CREATE POLICY "anon_all" ON messages FOR ALL USING (true) WITH CHECK (true);
+//  CREATE POLICY "anon_all_dm" ON direct_messages FOR ALL USING (true) WITH CHECK (true);
 // ================================================================
 
 var SUPABASE_URL = 'https://amcuddpczwixylrlhxru.supabase.co';

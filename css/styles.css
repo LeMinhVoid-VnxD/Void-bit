@@ -431,6 +431,43 @@ body {
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
+/* ---------- ONLINE USERS ---------- */
+.online-user {
+  background: linear-gradient(145deg, #1a2332, #151d2b);
+  border: 1px solid rgba(51, 65, 85, 0.3);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.online-user:hover {
+  border-color: rgba(0, 240, 255, 0.25);
+  background: rgba(0, 240, 255, 0.03);
+  transform: translateX(4px);
+}
+.online-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid #151d2b;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+
+.dm-mine .chat-msg-content {
+  background: rgba(0, 240, 255, 0.08);
+  border-color: rgba(0, 240, 255, 0.15);
+}
+.message-card.dm-mine {
+  flex-direction: row-reverse;
+}
+
 /* ---------- FADE IN ON SCROLL ---------- */
 .fade-in {
   opacity: 0;
