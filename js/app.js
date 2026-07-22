@@ -146,6 +146,18 @@ function gateCreateSession(username, displayName, avatarUrl) {
   forum.myAvatar = avatarUrl;
 }
 
+function renderNavProfile() {
+  var badge = $('#navUserBadge');
+  if (!badge) return;
+  if (!forum.loggedIn) {
+    badge.style.display = 'none';
+    return;
+  }
+  badge.style.display = 'flex';
+  badge.innerHTML = getAvatarHtml(forum.myName, forum.myAvatar, 7) +
+    '<span class="text-xs text-slate-400 hidden sm:inline max-w-[100px] truncate">' + escapeHtml(forum.myName) + '</span>';
+}
+
 // ----------------------------------------------------------------
 //  INIT — read localStorage, render everything
 // ----------------------------------------------------------------
@@ -160,6 +172,7 @@ function init() {
   forum.myName = localStorage.getItem('voidbit_forum_name') || 'Anonymous';
   forum.myAvatar = localStorage.getItem('voidbit_forum_avatar') || '';
   document.body.style.overflow = '';
+  renderNavProfile();
   loadProgress();
   renderNavStreak();
   renderCourses();

@@ -22,14 +22,15 @@
   ============================================================ -->
   <nav class="glass fixed top-0 left-0 right-0 z-50 h-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-      <!-- Logo -->
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg accent-bg flex items-center justify-center">
+      <!-- Logo / Profile -->
+      <div class="flex items-center gap-3" id="navProfile" style="cursor:pointer" onclick="openProfileModal()">
+        <div class="w-8 h-8 rounded-lg accent-bg flex items-center justify-center" id="navLogoIcon">
           <span class="text-[#0b1120] font-extrabold text-sm">{ }</span>
         </div>
         <span class="text-xl font-extrabold tracking-tight text-white">
           Void<span class="accent">-bit</span>
         </span>
+        <div id="navUserBadge" class="flex items-center gap-2 ml-2 pl-2 border-l border-slate-700/50" style="display:none"></div>
       </div>
 
       <!-- Desktop Links -->

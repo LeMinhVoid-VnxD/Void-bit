@@ -386,6 +386,7 @@ function setLanguage(lang) {
     renderProblemOfDay();
     renderTabs();
     renderRoadmapContent();
+    renderNavProfile();
     renderForum();
   }
 }
