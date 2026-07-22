@@ -154,7 +154,9 @@ function renderThreadList(container) {
       updateThreadReplyCount(payload.new.id, payload.new.reply_count);
     }
   );
-  ch.subscribe();
+  ch.subscribe(function(status, err) {
+    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.warn('Realtime forum-threads:', status, err);
+  });
   forum.channels.push(ch);
 }
 
@@ -260,7 +262,9 @@ function renderThreadView(container) {
       lucide.createIcons();
     }
   );
-  ch.subscribe();
+  ch.subscribe(function(status, err) {
+    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.warn('Realtime forum-msg:', status, err);
+  });
   forum.channels.push(ch);
 
   var input = $('#messageInput');
@@ -341,9 +345,11 @@ function trackPresence() {
       if (listEl) renderOnlineList(listEl);
     }
   });
-  forum.presenceChannel.subscribe(function(status) {
+  forum.presenceChannel.subscribe(function(status, err) {
     if (status === 'SUBSCRIBED') {
       forum.presenceChannel.track({ online_at: new Date().toISOString() });
+    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+      console.warn('Realtime presence:', status, err);
     }
   });
 }
@@ -570,7 +576,9 @@ function subscribeDMMessages(container, other) {
       }
     }
   );
-  ch.subscribe();
+  ch.subscribe(function(status, err) {
+    if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.warn('Realtime DM:', status, err);
+  });
   forum.unsubDm = function() { supabaseClient.removeChannel(ch); };
 }
 
