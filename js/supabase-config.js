@@ -65,6 +65,29 @@
 //      CREATE POLICY "anon_all_users" ON users FOR ALL USING (true) WITH CHECK (true);
 //    END IF;
 //  END $$;
+//
+//  -- Bảng submissions cho OJ (Online Judge) --
+//  CREATE TABLE IF NOT EXISTS submissions (
+//    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+//    username TEXT NOT NULL,
+//    display_name TEXT NOT NULL DEFAULT '',
+//    avatar_url TEXT NOT NULL DEFAULT '',
+//    problem_id TEXT NOT NULL,
+//    problem_title TEXT NOT NULL DEFAULT '',
+//    code TEXT NOT NULL,
+//    language TEXT NOT NULL DEFAULT 'cpp',
+//    verdict TEXT NOT NULL DEFAULT 'WA',
+//    score INT NOT NULL DEFAULT 0,
+//    max_score INT NOT NULL DEFAULT 0,
+//    created_at TIMESTAMPTZ DEFAULT now()
+//  );
+//
+//  ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
+//  DO $$ BEGIN
+//    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE policyname = 'anon_all' AND tablename = 'submissions') THEN
+//      CREATE POLICY "anon_all" ON submissions FOR ALL USING (true) WITH CHECK (true);
+//    END IF;
+//  END $$;
 // ================================================================
 
 var SUPABASE_URL = 'https://amcuddpczwixylrlhxru.supabase.co';

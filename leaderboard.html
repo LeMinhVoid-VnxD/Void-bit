@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BXH — Void-bit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="OJ/static/style.css">
+  <style>
+    body { padding-top: 4rem; background: var(--bg-primary); }
+    #toastContainer { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .oj-container { max-width: 1000px; margin: 0 auto; padding: 20px 24px; }
+    .rank-num { font-weight: 800; font-size: 1rem; width: 36px; text-align: center; }
+    .rank-1 { color: #fbbf24; } .rank-2 { color: #94a3b8; } .rank-3 { color: #d97706; }
+    .user-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: rgba(30,41,59,0.5); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; color: var(--text-muted); flex-shrink: 0; }
+    .top3-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <nav class="glass fixed top-0 left-0 right-0 z-50 h-16" style="background:rgba(15,23,42,.85);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg accent-bg flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span class="text-lg font-bold" style="color:var(--text-primary)">Void-bit</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <a href="oj-new.html" class="nav-link text-sm">Bài tập</a>
+        <a href="submissions.html" class="nav-link text-sm">Lịch sử</a>
+      </div>
+    </div>
+  </nav>
+
+  <div id="toastContainer"></div>
+
+  <main class="oj-container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div>
+        <h2 style="margin:0">Bảng xếp hạng</h2>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin:4px 0 0">Xếp hạng dựa trên số bài đã AC và tổng điểm</p>
+      </div>
+      <button onclick="loadLeaderboard()" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;font-size:0.85rem">⟳ Làm mới</button>
+    </div>
+
+    <div id="lbContent">
+      <div class="loader">Đang tải bảng xếp hạng...</div>
+    </div>
+  </main>
+
+  <script src="OJ/static/oj-init.js"></script>
+  <script>
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function getAvatarHtml(name, url) {
+      if (url) return '<img src="' + esc(url) + '" alt="" class="user-avatar" onerror="this.remove();this.parentElement.innerHTML=\'' + esc(name.charAt(0).toUpperCase()) + '\'" loading="lazy">';
+      return '<div class="user-avatar">' + (name ? name.charAt(0).toUpperCase() : '?') + '</div>';
+    }
+
+    async function loadLeaderboard() {
+      var el = document.getElementById('lbContent');
+      el.innerHTML = '<div class="loader">Đang tải bảng xếp hạng...</div>';
+
+      try {
+        var res = await ojdb.from('submissions').select('username, display_name, problem_id, verdict, score, max_score, created_at');
+        if (res.error) { el.innerHTML = '<div class="loader" style="color:#ef4444">Lỗi: ' + esc(res.error.message) + '</div>'; return; }
+
+        var subs = res.data || [];
+        if (subs.length === 0) {
+          el.innerHTML = '<div class="no-data"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg><p>Chưa có dữ liệu xếp hạng. Hãy là người đầu tiên nộp bài!</p></div>';
+          return;
+        }
+
+        var users = {};
+        subs.forEach(function(s) {
+          var uname = s.username || 'unknown';
+          if (!users[uname]) users[uname] = { username: uname, displayName: s.display_name || uname, solved: {}, totalScore: 0, totalMax: 0, subs: 0, lastSub: s.created_at };
+          var u = users[uname];
+          u.subs++;
+          if (s.verdict === 'AC' && s.problem_id) u.solved[s.problem_id] = true;
+          u.totalScore += s.score || 0;
+          u.totalMax += s.max_score || 0;
+          if (s.created_at > u.lastSub) u.lastSub = s.created_at;
+        });
+
+        var ranked = Object.keys(users).map(function(k) {
+          var u = users[k];
+          return {
+            username: u.username,
+            displayName: u.displayName,
+            solved: Object.keys(u.solved).length,
+            totalScore: u.totalScore,
+            totalMax: u.totalMax,
+            subs: u.subs,
+            accuracy: u.totalMax > 0 ? Math.round(u.totalScore / u.totalMax * 100) : 0,
+            lastSub: u.lastSub
+          };
+        });
+
+        ranked.sort(function(a, b) {
+          if (b.solved !== a.solved) return b.solved - a.solved;
+          if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+          return new Date(a.lastSub) - new Date(b.lastSub);
+        });
+
+        var html = '<div class="table-container"><table class="problems-table"><thead><tr><th style="width:50px">#</th><th>Thí sinh</th><th style="width:110px">Số bài AC</th><th style="width:120px">Tổng điểm</th><th style="width:90px">Chính xác</th><th style="width:90px">Lượt nộp</th></tr></thead><tbody>';
+        ranked.forEach(function(u, i) {
+          var rank = i + 1;
+          var cls = rank <= 3 ? 'rank-' + rank : '';
+          var badge = '';
+          if (rank === 1) badge = '<span class="top3-badge" style="background:rgba(251,191,36,0.15);color:#fbbf24">Vàng</span>';
+          else if (rank === 2) badge = '<span class="top3-badge" style="background:rgba(148,163,184,0.15);color:#94a3b8">Bạc</span>';
+          else if (rank === 3) badge = '<span class="top3-badge" style="background:rgba(217,119,6,0.15);color:#d97706">Đồng</span>';
+
+          html += '<tr>' +
+            '<td><span class="rank-num ' + cls + '">' + rank + '</span></td>' +
+            '<td><div style="display:flex;align-items:center;gap:10px">' +
+              '<div class="user-avatar">' + (u.displayName ? u.displayName.charAt(0).toUpperCase() : '?') + '</div>' +
+              '<div><div style="font-weight:600;color:var(--text-primary)">' + esc(u.displayName) + '</div>' +
+              '<div style="font-size:0.75rem;color:var(--text-muted)">@' + esc(u.username) + '</div></div>' +
+              badge +
+            '</div></td>' +
+            '<td style="font-weight:700;color:#22c55e;font-size:1.1rem">' + u.solved + '</td>' +
+            '<td style="font-weight:600">' + u.totalScore + ' / ' + u.totalMax + '</td>' +
+            '<td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:6px;border-radius:3px;background:var(--border-color);max-width:60px"><div style="height:100%;border-radius:3px;width:' + u.accuracy + '%;background:' + (u.accuracy >= 80 ? '#22c55e' : u.accuracy >= 50 ? '#f59e0b' : '#ef4444') + '"></div></div><span style="font-size:0.8rem;color:var(--text-muted)">' + u.accuracy + '%</span></div></td>' +
+            '<td style="font-size:0.85rem;color:var(--text-muted)">' + u.subs + '</td>' +
+          '</tr>';
+        });
+        html += '</tbody></table></div>';
+        el.innerHTML = html;
+      } catch(e) {
+        el.innerHTML = '<div class="loader" style="color:#ef4444">Lỗi: ' + esc(e.message) + '</div>';
+        ojToast('Lỗi tải bảng xếp hạng', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadLeaderboard);
+  </script>
+</body>
+</html>

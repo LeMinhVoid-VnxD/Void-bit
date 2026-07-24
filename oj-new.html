@@ -6,18 +6,21 @@
   <title>OJ — Void-bit</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="OJ/static/style.css">
   <style>
     body { padding-top: 4rem; background: var(--bg-primary); }
-    .view { display: none; }
-    .view.active { display: block; }
-    .view.hidden { display: none; }
+    .oj-container { max-width: 1280px; margin: 0 auto; padding: 20px 24px; }
+    .problem-row { cursor: pointer; transition: background .15s; }
+    .problem-row:hover { background: rgba(59,130,246,0.05); }
+    .status-icon { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .refresh-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border-color); background: transparent; color: var(--text-primary); cursor: pointer; font-size: 0.8rem; }
+    .refresh-btn:hover { border-color: var(--primary); color: var(--primary); }
   </style>
 </head>
 <body>
-  <!-- Navbar -->
   <nav class="glass fixed top-0 left-0 right-0 z-50 h-16" style="background:rgba(15,23,42,.85);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
       <a href="index.html" class="flex items-center gap-3">
@@ -26,112 +29,98 @@
         </div>
         <span class="text-lg font-bold" style="color:var(--text-primary)">Void-bit</span>
       </a>
-      <div class="flex items-center gap-2">
-        <a href="index.html" class="nav-link">Trang chủ</a>
+      <div class="flex items-center gap-3">
+        <a href="submissions.html" class="nav-link text-sm">Lịch sử</a>
+        <a href="leaderboard.html" class="nav-link text-sm">BXH</a>
       </div>
     </div>
   </nav>
 
-  <div id="toastContainer" class="toast-container"></div>
-
-  <main class="container">
-    <section id="view-problems" class="view active">
-      <div class="section-header">
-        <div class="header-title-area">
-          <h2>Danh sách bài tập</h2>
-          <p class="subtitle">Hãy giải các bài tập lập trình bên dưới để rèn luyện tư duy</p>
-        </div>
+  <main class="oj-container">
+    <div class="section-header">
+      <div class="header-title-area">
+        <h2>Danh sách bài tập</h2>
+        <p class="subtitle">Giải các bài tập lập trình bên dưới để rèn luyện tư duy</p>
       </div>
-      <div class="filter-bar">
-        <div class="category-tabs" id="categoryTabs">
-          <button class="tab-btn active" data-cat="all">Tất cả</button>
-          <button class="tab-btn" data-cat="dp">Quy hoạch động</button>
-          <button class="tab-btn" data-cat="binary_search">Chặt nhị phân</button>
-          <button class="tab-btn" data-cat="greedy">Tham lam</button>
-          <button class="tab-btn" data-cat="graph">Đồ thị</button>
-          <button class="tab-btn" data-cat="math">Toán học</button>
-          <button class="tab-btn" data-cat="string">Xử lý xâu</button>
-          <button class="tab-btn" data-cat="data_structure">Cấu trúc dữ liệu</button>
-          <button class="tab-btn" data-cat="other">Khác</button>
-        </div>
-        <div class="search-box">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input type="text" id="searchInput" placeholder="Tìm tên bài...">
-        </div>
+      <button class="refresh-btn" onclick="renderList()">⟳ Làm mới</button>
+    </div>
+    <div class="filter-bar">
+      <div class="category-tabs" id="categoryTabs">
+        <button class="tab-btn active" data-cat="all">Tất cả</button>
+        <button class="tab-btn" data-cat="dp">Quy hoạch động</button>
+        <button class="tab-btn" data-cat="binary_search">Chặt nhị phân</button>
+        <button class="tab-btn" data-cat="greedy">Tham lam</button>
+        <button class="tab-btn" data-cat="graph">Đồ thị</button>
+        <button class="tab-btn" data-cat="math">Toán học</button>
+        <button class="tab-btn" data-cat="string">Xử lý xâu</button>
+        <button class="tab-btn" data-cat="data_structure">Cấu trúc dữ liệu</button>
+        <button class="tab-btn" data-cat="other">Khác</button>
       </div>
-      <div class="table-container">
-        <table class="problems-table" id="problemsTable">
-          <thead>
-            <tr>
-              <th style="width:80px">Trạng thái</th>
-              <th>Tên bài tập</th>
-              <th style="width:180px">Chủ đề</th>
-              <th style="width:120px">Độ khó</th>
-              <th style="width:90px">Rating</th>
-              <th style="width:120px">Subtasks</th>
-              <th style="width:120px">Số testcase</th>
-            </tr>
-          </thead>
-          <tbody id="problemsTableBody"></tbody>
-        </table>
-        <div id="noProblemsMessage" class="no-data hidden">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
-          <p>Không tìm thấy bài tập nào phù hợp.</p>
-        </div>
+      <div class="search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Tìm tên bài...">
       </div>
-    </section>
-
-    <section id="view-problem-detail" class="view hidden">
-      <div class="problem-detail-layout">
-        <article class="statement-column">
-          <div class="card statement-card">
-            <h1 id="prob-title" class="prob-title">Tải dữ liệu...</h1>
-            <div class="meta-pills">
-              <span class="meta-pill" id="prob-difficulty">...</span>
-              <span class="meta-pill" id="prob-category">...</span>
-              <span class="meta-pill" id="prob-time-limit">...</span>
-              <span class="meta-pill" id="prob-memory-limit">...</span>
-            </div>
-            <div id="section-description" class="prob-section"><h3>Mô tả</h3><div id="prob-description"></div></div>
-            <div id="section-input-format" class="prob-section hidden"><h3>Định dạng đầu vào</h3><div id="prob-input-format"></div></div>
-            <div id="section-output-format" class="prob-section hidden"><h3>Định dạng đầu ra</h3><div id="prob-output-format"></div></div>
-            <div id="section-constraints" class="prob-section hidden"><h3>Ràng buộc</h3><div id="prob-constraints"></div></div>
-            <div id="section-subtasks" class="prob-section hidden"><h3>Các subtask</h3><div id="prob-subtasks"></div></div>
-            <div id="section-samples" class="prob-section"><h3>Ví dụ</h3><div id="prob-samples"></div></div>
-          </div>
-        </article>
-        <aside class="submit-column">
-          <div class="card editor-card">
-            <div class="editor-toolbar">
-              <select id="languageSelect" class="form-control"><option value="cpp">C++</option><option value="python">Python</option><option value="java">Java</option></select>
-              <button id="btnSubmit" class="btn-primary" onclick="handleCodeSubmit()">Nộp bài</button>
-            </div>
-            <textarea id="codeEditor" class="code-editor" spellcheck="false" placeholder="Viết mã nguồn của bạn ở đây..."></textarea>
-            <div id="quickResultBox" class="quick-result-box hidden">
-              <div class="verdict-row"><span id="quickVerdict" class="verdict-text">Judging...</span><span id="quickScore" class="verdict-score">- / -</span></div>
-              <div class="score-bar"><div id="quickScoreProgress" class="score-progress" style="width:0%"></div></div>
-              <div id="quickSubtaskResults"></div>
-            </div>
-          </div>
-        </aside>
+    </div>
+    <div class="table-container">
+      <table class="problems-table" id="problemsTable">
+        <thead>
+          <tr>
+            <th style="width:60px">Trạng thái</th>
+            <th>Tên bài tập</th>
+            <th style="width:160px">Chủ đề</th>
+            <th style="width:100px">Độ khó</th>
+            <th style="width:80px">Rating</th>
+            <th style="width:100px">Subtasks</th>
+            <th style="width:110px">Testcase</th>
+          </tr>
+        </thead>
+        <tbody id="problemsTableBody"></tbody>
+      </table>
+      <div id="noProblemsMessage" class="no-data hidden">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        <p>Không tìm thấy bài tập nào phù hợp.</p>
       </div>
-    </section>
+    </div>
   </main>
 
   <script src="OJ/problems/problems-data.js"></script>
   <script src="OJ/problems/problems-all.js"></script>
+  <script src="OJ/static/oj-init.js"></script>
   <script>
-    // ======================================================================
-    // Standalone OJ — Fully Self-Contained
-    // ======================================================================
-
     var currCategory = 'all';
     var currQuery = '';
-    var currentProblem = null;
-
+    var solvedMap = {};
     var CAT_NAMES = { dp:'Quy hoạch động', binary_search:'Chặt nhị phân', greedy:'Tham lam', graph:'Đồ thị', math:'Toán học', string:'Xử lý xâu', data_structure:'Cấu trúc dữ liệu', other:'Khác' };
 
-    // ── Rendering ──────────────────────────────────────────────────────────
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function statusIcon(pid) {
+      if (!solvedMap[pid]) {
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted)"><circle cx="12" cy="12" r="10"/></svg>';
+      }
+      if (solvedMap[pid] === 'AC') {
+        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+      }
+      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>';
+    }
+
+    async function loadSolvedStatus() {
+      var user = ojUser();
+      if (!user) { solvedMap = {}; renderList(); return; }
+      try {
+        var res = await ojdb.from('submissions').select('problem_id, verdict').eq('username', user.username);
+        if (res.error) { solvedMap = {}; renderList(); return; }
+        solvedMap = {};
+        (res.data || []).forEach(function(s) {
+          var pid = s.problem_id;
+          if (!solvedMap[pid] || (s.verdict === 'AC' && solvedMap[pid] !== 'AC')) {
+            solvedMap[pid] = s.verdict;
+          }
+        });
+      } catch(e) { solvedMap = {}; }
+      renderList();
+    }
+
     function renderList() {
       var body = document.getElementById('problemsTableBody');
       var noData = document.getElementById('noProblemsMessage');
@@ -153,180 +142,23 @@
       if (noData) noData.classList.add('hidden');
       filtered.forEach(function(p) {
         var tr = document.createElement('tr');
-        tr.style.cursor = 'pointer';
-        tr.onclick = function() { showDetail(p.id); };
+        tr.className = 'problem-row';
+        tr.onclick = function() { window.location.href = 'problem.html?id=' + encodeURIComponent(p.id); };
         var cn = CAT_NAMES[p.category] || p.category || 'Khác';
         tr.innerHTML = [
-          '<td><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted)"><circle cx="12" cy="12" r="10"/></svg></td>',
+          '<td>' + statusIcon(p.id) + '</td>',
           '<td style="font-weight:500;color:var(--primary)">' + esc(p.title) + '</td>',
           '<td><span class="tag">' + esc(cn) + '</span></td>',
           '<td><span class="badge badge-' + (p.difficulty||'easy') + '">' + (p.difficulty||'easy') + '</span></td>',
           '<td>' + (p.cf_rating ? '<span class="badge badge-rating">' + p.cf_rating + '</span>' : '-') + '</td>',
-          '<td>' + (p.subtask_count||0) + ' subtasks</td>',
-          '<td>' + (p.test_count||0) + ' tests</td>'
+          '<td>' + (p.subtask_count||0) + '</td>',
+          '<td>' + (p.test_count||0) + '</td>'
         ].join('');
         body.appendChild(tr);
       });
     }
 
-    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-    // ── Detail ────────────────────────────────────────────────────────────
-    function showDetail(id) {
-      if (typeof PROBLEMS_ALL === 'undefined' || !PROBLEMS_ALL || !PROBLEMS_ALL[id]) {
-        showToast('Không tìm thấy bài tập', 'error');
-        return;
-      }
-      currentProblem = PROBLEMS_ALL[id];
-      document.getElementById('view-problems').classList.remove('active');
-      document.getElementById('view-problems').classList.add('hidden');
-      document.getElementById('view-problem-detail').classList.remove('hidden');
-      document.getElementById('view-problem-detail').classList.add('active');
-
-      var p = currentProblem;
-      document.getElementById('prob-title').textContent = p.title;
-      document.getElementById('prob-difficulty').textContent = p.difficulty;
-      document.getElementById('prob-category').textContent = CAT_NAMES[p.category] || p.category || 'Khác';
-      document.getElementById('prob-time-limit').textContent = (p.time_limit||1) + 's';
-      document.getElementById('prob-memory-limit').textContent = (p.memory_limit||256) + 'MB';
-
-      fillSection('section-description', 'prob-description', p.description);
-      fillSection('section-input-format', 'prob-input-format', p.input_format);
-      fillSection('section-output-format', 'prob-output-format', p.output_format);
-      fillSection('section-constraints', 'prob-constraints', p.constraints);
-
-      var subtasksEl = document.getElementById('prob-subtasks');
-      var subtaskSec = document.getElementById('section-subtasks');
-      subtasksEl.innerHTML = '';
-      if (p.subtasks && p.subtasks.length) {
-        subtaskSec.classList.remove('hidden');
-        p.subtasks.forEach(function(s) {
-          var d = document.createElement('div');
-          d.className = 'subtask-item';
-          d.innerHTML = '<div class="subtask-info"><span class="subtask-name">Subtask #' + s.id + '</span><span class="subtask-constraints">' + esc(s.constraints||'') + '</span></div><span class="subtask-points">' + s.points + ' điểm</span>';
-          subtasksEl.appendChild(d);
-        });
-      } else {
-        subtaskSec.classList.add('hidden');
-      }
-
-      var samplesEl = document.getElementById('prob-samples');
-      samplesEl.innerHTML = '';
-      if (p.samples && p.samples.length) {
-        p.samples.forEach(function(s, i) {
-          var b = document.createElement('div');
-          b.className = 'sample-block';
-          var eh = s.explanation ? '<div class="sample-explanation"><strong>Giải thích:</strong> ' + esc(s.explanation) + '</div>' : '';
-          b.innerHTML = '<div class="sample-header"><span>Ví dụ #' + (i+1) + '</span></div><pre class="sample-body">' + esc(s.input) + '</pre><div class="sample-header" style="border-top:1px solid var(--border-color)"><span>Kết quả mẫu</span></div><pre class="sample-body">' + esc(s.output) + '</pre>' + eh;
-          samplesEl.appendChild(b);
-        });
-      } else {
-        samplesEl.innerHTML = '<p class="text-secondary">Không có ví dụ mẫu.</p>';
-      }
-
-      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch(e) {}
-    }
-
-    function goToList() {
-      document.getElementById('view-problem-detail').classList.remove('active');
-      document.getElementById('view-problem-detail').classList.add('hidden');
-      document.getElementById('view-problems').classList.remove('hidden');
-      document.getElementById('view-problems').classList.add('active');
-    }
-
-    function fillSection(secId, elId, val) {
-      var sec = document.getElementById(secId);
-      var el = document.getElementById(elId);
-      if (!sec || !el) return;
-      if (val && val.trim()) {
-        sec.classList.remove('hidden');
-        el.innerHTML = val.replace(/\n/g, '<br>');
-      } else {
-        sec.classList.add('hidden');
-      }
-    }
-
-    // ── Wandbox ───────────────────────────────────────────────────────────
-    var WANDBOX_COMPILERS = { cpp:'gcc-13.1.0', python:'python3-10.0', java:'openjdk-java-18.0.1' };
-
-    async function wandboxSubmit(code, compiler, stdin) {
-      var r = await fetch('https://wandbox.org/api/compile.json', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({compiler:compiler, code:code, stdin:stdin, 'compiler-option-raw':'-O2', save:false})
-      });
-      if (!r.ok) throw new Error('Wandbox error (' + r.status + ')');
-      return r.json();
-    }
-
-    function normalizeOutput(s) { return (s||'').replace(/\r\n/g,'\n').replace(/\s+$/,'').trim(); }
-
-    async function handleCodeSubmit() {
-      var prob = currentProblem;
-      if (!prob) { showToast('Chưa có bài tập nào được chọn', 'error'); return; }
-      var code = document.getElementById('codeEditor');
-      var langSel = document.getElementById('languageSelect');
-      var btn = document.getElementById('btnSubmit');
-      if (!code || !code.value.trim()) { showToast('Vui lòng viết mã nguồn', 'error'); return; }
-      var lang = langSel ? langSel.value : 'cpp';
-      var compiler = WANDBOX_COMPILERS[lang];
-      if (!compiler) { showToast('Ngôn ngữ không được hỗ trợ', 'error'); return; }
-
-      btn.disabled = true;
-      btn.innerHTML = 'Đang chấm...';
-      var box = document.getElementById('quickResultBox');
-      var vEl = document.getElementById('quickVerdict');
-      var sEl = document.getElementById('quickScore');
-      var pEl = document.getElementById('quickScoreProgress');
-      box.classList.remove('hidden');
-      vEl.textContent = 'Judging...'; vEl.className = 'verdict-text JUDGING';
-      sEl.textContent = '- / -'; pEl.style.width = '0%';
-
-      try {
-        var tcs = prob.test_cases || [];
-        if (tcs.length === 0) { showToast('Không có test case', 'error'); return; }
-        var results = [];
-        for (var i = 0; i < tcs.length; i++) {
-          vEl.textContent = 'Chấm... (' + (i+1) + '/' + tcs.length + ')';
-          var r = await wandboxSubmit(code.value, compiler, tcs[i].input);
-          var v = 'WA';
-          if (r.status === '0') {
-            var t = r.time ? parseFloat(r.time.replace('s','')) : 0;
-            if (t > (prob.time_limit||2)) v = 'TLE';
-            else if (normalizeOutput(r.program_output) === normalizeOutput(tcs[i].output)) v = 'AC';
-          } else { v = (r.signal && parseInt(r.signal)!==0) ? 'RE' : 'CE'; }
-          results.push({i:i, v:v, stderr:r.compiler_error||r.program_error||''});
-          if (v === 'CE') break;
-          await new Promise(function(r) { setTimeout(r, 300); });
-        }
-        var ac = results.filter(function(r){return r.v==='AC';}).length;
-        var total = tcs.length;
-        vEl.textContent = ac === total ? 'AC' : (ac>0 ? 'ATT' : 'WA');
-        vEl.className = 'verdict-text ' + (ac===total?'AC':'WA');
-        sEl.textContent = ac + ' / ' + total;
-        pEl.style.width = Math.round(ac/total*100) + '%';
-      } catch(e) {
-        console.error(e);
-        vEl.textContent = 'Lỗi chấm'; vEl.className = 'verdict-text WA';
-        showToast('Lỗi: ' + e.message, 'error');
-      }
-      btn.disabled = false;
-      btn.innerHTML = 'Nộp bài';
-    }
-
-    // ── Toast ─────────────────────────────────────────────────────────────
-    function showToast(msg, type) {
-      var c = document.getElementById('toastContainer');
-      if (!c) return;
-      var t = document.createElement('div');
-      t.className = 'toast toast-' + (type||'info');
-      t.textContent = msg;
-      c.appendChild(t);
-      setTimeout(function() { t.remove(); }, 3000);
-    }
-
-    // ── Init ──────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
-      // Category tabs
       var tabs = document.getElementById('categoryTabs');
       if (tabs) {
         var btns = tabs.children;
@@ -341,11 +173,11 @@
           })(btns[i]);
         }
       }
-      // Search
       var si = document.getElementById('searchInput');
       if (si) si.addEventListener('input', function() { currQuery = this.value; renderList(); });
-      // Render
-      renderList();
+
+      loadSolvedStatus();
+      try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch(e) {}
     });
   </script>
 </body>

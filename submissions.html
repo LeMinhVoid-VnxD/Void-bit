@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lịch sử nộp bài — Void-bit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="OJ/static/style.css">
+  <style>
+    body { padding-top: 4rem; background: var(--bg-primary); }
+    #toastContainer { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .oj-container { max-width: 1200px; margin: 0 auto; padding: 20px 24px; }
+    .filter-row { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    .filter-row select, .filter-row input { padding: 8px 14px; border-radius: 6px; background: rgba(30,41,59,0.5); border: 1px solid var(--border-color); color: var(--text-primary); font-size: 0.85rem; outline: none; }
+    .filter-row input { flex: 1; min-width: 200px; }
+    .verdict-badge { display: inline-block; padding: 2px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
+    .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat-card { padding: 16px; border-radius: 8px; background: rgba(30,41,59,0.3); border: 1px solid var(--border-color); text-align: center; }
+    .stat-card .num { font-size: 1.5rem; font-weight: 800; }
+    .stat-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <nav class="glass fixed top-0 left-0 right-0 z-50 h-16" style="background:rgba(15,23,42,.85);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg accent-bg flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <span class="text-lg font-bold" style="color:var(--text-primary)">Void-bit</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <a href="oj-new.html" class="nav-link text-sm">Bài tập</a>
+        <a href="leaderboard.html" class="nav-link text-sm">BXH</a>
+      </div>
+    </div>
+  </nav>
+
+  <div id="toastContainer"></div>
+
+  <main class="oj-container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <h2 style="margin:0">Lịch sử nộp bài</h2>
+      <button onclick="loadSubmissions()" style="padding:8px 16px;border-radius:6px;border:1px solid var(--border-color);background:transparent;color:var(--text-primary);cursor:pointer;font-size:0.85rem">⟳ Làm mới</button>
+    </div>
+
+    <div id="loginPrompt" style="display:none;text-align:center;padding:60px 20px">
+      <p style="color:var(--text-muted);margin-bottom:16px">Vui lòng đăng nhập để xem lịch sử nộp bài</p>
+      <a href="index.html" style="display:inline-block;padding:10px 24px;border-radius:8px;background:linear-gradient(135deg,#00f0ff,#3b82f6);color:#fff;font-size:0.875rem;font-weight:600;text-decoration:none">Đăng nhập</a>
+    </div>
+
+    <div id="submissionsContent" style="display:none">
+      <div class="stat-cards" id="statCards"></div>
+      <div class="filter-row">
+        <select id="filterVerdict" onchange="loadSubmissions()">
+          <option value="all">Tất cả kết quả</option>
+          <option value="AC">AC</option>
+          <option value="WA">WA</option>
+        </select>
+        <input type="text" id="filterProblem" placeholder="Tìm theo tên bài..." oninput="loadSubmissions()">
+      </div>
+      <div class="table-container">
+        <table class="problems-table" id="subsTable">
+          <thead>
+            <tr>
+              <th style="width:100px">Kết quả</th>
+              <th>Bài tập</th>
+              <th style="width:100px">Điểm</th>
+              <th style="width:90px">Ngôn ngữ</th>
+              <th style="width:170px">Thời gian</th>
+            </tr>
+          </thead>
+          <tbody id="subsBody"></tbody>
+        </table>
+        <div id="noSubs" class="no-data hidden">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          <p>Chưa có bài nộp nào.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="OJ/static/oj-init.js"></script>
+  <script>
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function getParam(name) {
+      var m = window.location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+
+    function verdictStyle(v) {
+      if (v === 'AC') return 'background:rgba(34,197,94,0.15);color:#22c55e';
+      if (v === 'WA') return 'background:rgba(239,68,68,0.15);color:#ef4444';
+      if (v === 'TLE') return 'background:rgba(245,158,11,0.15);color:#f59e0b';
+      if (v === 'RE') return 'background:rgba(249,115,22,0.15);color:#f97316';
+      if (v === 'CE') return 'background:rgba(168,85,247,0.15);color:#a855f7';
+      return 'background:rgba(100,116,139,0.15);color:#64748b';
+    }
+
+    async function loadSubmissions() {
+      var user = ojUser();
+      if (!user) {
+        document.getElementById('loginPrompt').style.display = 'block';
+        document.getElementById('submissionsContent').style.display = 'none';
+        return;
+      }
+      document.getElementById('loginPrompt').style.display = 'none';
+      document.getElementById('submissionsContent').style.display = 'block';
+
+      var problemFilter = getParam('problem') || '';
+      var uiFilter = document.getElementById('filterProblem');
+      if (problemFilter && uiFilter) uiFilter.value = problemFilter;
+
+      var q = ojdb.from('submissions').select('*').eq('username', user.username).order('created_at', {ascending:false}).limit(200);
+
+      var fv = document.getElementById('filterVerdict');
+      if (fv && fv.value !== 'all') q = q.eq('verdict', fv.value);
+
+      var fp = document.getElementById('filterProblem');
+      if (fp && fp.value.trim()) q = q.ilike('problem_title', '%' + fp.value.trim() + '%');
+
+      // For URL param filter
+      if (problemFilter && (!fp || !fp.value.trim())) q = q.eq('problem_id', problemFilter);
+
+      try {
+        var res = await q;
+        if (res.error) { ojToast('Lỗi: ' + res.error.message, 'error'); return; }
+        renderSubs(res.data || []);
+      } catch(e) { ojToast('Lỗi tải dữ liệu', 'error'); }
+    }
+
+    function renderSubs(data) {
+      var body = document.getElementById('subsBody');
+      var noData = document.getElementById('noSubs');
+      body.innerHTML = '';
+
+      var ac = data.filter(function(s){return s.verdict==='AC';}).length;
+      var wa = data.filter(function(s){return s.verdict!=='AC';}).length;
+      var solved = {};
+      data.forEach(function(s){ if (s.verdict === 'AC') solved[s.problem_id] = true; });
+      var solvedCount = Object.keys(solved).length;
+
+      document.getElementById('statCards').innerHTML =
+        '<div class="stat-card"><div class="num" style="color:#22c55e">' + data.length + '</div><div class="lbl">Tổng lượt nộp</div></div>' +
+        '<div class="stat-card"><div class="num" style="color:#22c55e">' + ac + '</div><div class="lbl">AC</div></div>' +
+        '<div class="stat-card"><div class="num" style="color:#ef4444">' + wa + '</div><div class="lbl">WA</div></div>' +
+        '<div class="stat-card"><div class="num" style="color:#3b82f6">' + solvedCount + '</div><div class="lbl">Bài đã AC</div></div>';
+
+      if (data.length === 0) { noData.classList.remove('hidden'); return; }
+      noData.classList.add('hidden');
+
+      data.forEach(function(s) {
+        var tr = document.createElement('tr');
+        var dt = new Date(s.created_at);
+        var timeStr = dt.toLocaleDateString('vi-VN') + ' ' + dt.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        var style = verdictStyle(s.verdict);
+        tr.innerHTML =
+          '<td><span class="verdict-badge" style="' + style + '">' + esc(s.verdict || 'WA') + '</span></td>' +
+          '<td><a href="problem.html?id=' + encodeURIComponent(s.problem_id) + '" style="color:var(--primary);text-decoration:none">' + esc(s.problem_title || s.problem_id) + '</a></td>' +
+          '<td>' + (s.score != null ? s.score + '/' + s.max_score : '-') + '</td>' +
+          '<td style="font-size:0.8rem;color:var(--text-muted)">' + esc(s.language || 'cpp') + '</td>' +
+          '<td style="font-size:0.8rem;color:var(--text-muted)">' + timeStr + '</td>';
+        body.appendChild(tr);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSubmissions);
+  </script>
+</body>
+</html>
