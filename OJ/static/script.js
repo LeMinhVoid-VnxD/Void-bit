@@ -348,13 +348,24 @@ async function viewProblemDetail(id) {
   document.getElementById('chatMessages').innerHTML = '';
   chatHistory = [];
 
-  // Auto-request hint (if enabled)
-  var cfg = {};
-  try { cfg = JSON.parse(localStorage.getItem('oj_local_settings') || '{}'); } catch(e) {}
-  if (cfg.autoRequest !== false) {
-    setTimeout(function() {
-      sendChatMessage('Hãy hướng dẫn tôi giải bài này: thuật toán, cách tiếp cận, thời gian và bộ nhớ (độ phức tạp).');
-    }, 300);
+  // Auto-request hint (skip if using embedded data = no backend)
+  if (typeof PROBLEMS_ALL === 'undefined' || !PROBLEMS_ALL) {
+    var cfg = {};
+    try { cfg = JSON.parse(localStorage.getItem('oj_local_settings') || '{}'); } catch(e) {}
+    if (cfg.autoRequest !== false) {
+      setTimeout(function() {
+        sendChatMessage('Hãy hướng dẫn tôi giải bài này: thuật toán, cách tiếp cận, thời gian và bộ nhớ (độ phức tạp).');
+      }, 300);
+    }
+  } else {
+    // No backend — show a hint in chat
+    var chatMsg = document.getElementById('chatMessages');
+    if (chatMsg) {
+      var div = document.createElement('div');
+      div.className = 'chat-msg chat-msg-ai';
+      div.innerHTML = '<div class="chat-msg-content" style="color:#8a99ad">Cần chạy OJ Server (oj_server.exe) để dùng AI Chat.</div>';
+      chatMsg.appendChild(div);
+    }
   }
   
   lucide.createIcons();
