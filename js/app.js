@@ -15,6 +15,36 @@ const $$ = (s, p) => [...(p || document).querySelectorAll(s)];
 var CAT_NAMES = { dp:'Quy hoạch động', binary_search:'Chặt nhị phân', greedy:'Tham lam', graph:'Đồ thị', math:'Toán học', string:'Xử lý xâu', data_structure:'Cấu trúc dữ liệu', other:'Khác' };
 
 // ----------------------------------------------------------------
+//  ROLE HIERARCHY (highest → lowest)
+// ----------------------------------------------------------------
+var ROLES = [
+  { id:'Owner',   label:'Owner',  badge:'👑', level:9, color:'text-amber-400' },
+  { id:'Admin',   label:'Admin',  badge:'🛡️', level:8, color:'text-red-400' },
+  { id:'Co-Admin',label:'C-Adm',  badge:'⚔️', level:7, color:'text-orange-400' },
+  { id:'Dev',     label:'Dev',    badge:'💻', level:6, color:'text-cyan-400' },
+  { id:'Executor',label:'Exec',   badge:'⚡', level:5, color:'text-yellow-400' },
+  { id:'AI-Check',label:'AI-C',   badge:'🤖', level:4, color:'text-purple-400' },
+  { id:'Member',  label:'Member', badge:'👤', level:3, color:'text-slate-400' },
+  { id:'Skid',    label:'Skid',   badge:'🐍', level:2, color:'text-green-500' },
+  { id:'Vibe',    label:'Vibe',   badge:'🌊', level:1, color:'text-blue-300' },
+];
+
+function getRoleInfo(id) {
+  return ROLES.find(function(r) { return r.id === id; }) || ROLES[6];
+}
+
+function hasRole(userRole, minRole) {
+  var u = getRoleInfo(userRole);
+  var m = getRoleInfo(minRole);
+  return u.level >= m.level;
+}
+
+function getRoleBadge(role) {
+  var r = getRoleInfo(role);
+  return '<span class="role-badge" style="color:' + r.color + ';font-size:0.7rem;font-weight:600">' + r.badge + ' ' + r.label + '</span>';
+}
+
+// ----------------------------------------------------------------
 //  LOCALSTORAGE KEYS
 // ----------------------------------------------------------------
 const LS_PROGRESS = 'voidbit_progress';
@@ -110,7 +140,8 @@ function gateRegister(username, password, errEl) {
     username: username.toLowerCase(),
     password_hash: passHash,
     display_name: displayName,
-    avatar_url: avatarUrl
+    avatar_url: avatarUrl,
+    role: 'Member'
   }).then(function(res) {
     if (res.error) {
       if (res.error.message && res.error.message.indexOf('duplicate') > -1) {
@@ -120,7 +151,7 @@ function gateRegister(username, password, errEl) {
       }
       return;
     }
-    gateCreateSession(username, displayName, avatarUrl);
+    gateCreateSession(username, displayName, avatarUrl, 'Member');
     hideAuthGate();
     location.reload();
   });
@@ -137,18 +168,19 @@ function gateLogin(username, password, errEl) {
       if (errEl) { errEl.textContent = t('forum.wrongPass'); errEl.style.display = ''; }
       return;
     }
-    gateCreateSession(username, res.data.display_name || username, res.data.avatar_url || '');
+    gateCreateSession(username, res.data.display_name || username, res.data.avatar_url || '', res.data.role || 'Member');
     hideAuthGate();
     location.reload();
   });
 }
 
-function gateCreateSession(username, displayName, avatarUrl) {
+function gateCreateSession(username, displayName, avatarUrl, role) {
   var token = hashStr(username + ':' + Date.now());
   localStorage.setItem('voidbit_session', token);
   localStorage.setItem('voidbit_username', username.toLowerCase());
   localStorage.setItem('voidbit_forum_name', displayName);
   localStorage.setItem('voidbit_forum_avatar', avatarUrl);
+  localStorage.setItem('voidbit_role', role || 'Member');
   forum.loggedIn = true;
   forum.myName = displayName;
   forum.myAvatar = avatarUrl;
@@ -164,8 +196,10 @@ function renderNavProfile() {
     return;
   }
   badge.style.display = 'flex';
+  var userRole = localStorage.getItem('voidbit_role') || 'Member';
   badge.innerHTML = getAvatarHtml(forum.myName, forum.myAvatar, 7) +
-    '<span class="text-xs text-slate-400 hidden sm:inline max-w-[100px] truncate">' + escapeHtml(forum.myName) + '</span>';
+    '<span class="text-xs text-slate-400 hidden sm:inline max-w-[100px] truncate">' + escapeHtml(forum.myName) + '</span>' +
+    getRoleBadge(userRole);
   if (forum.myAvatar) {
     var initial = forum.myName ? forum.myName.charAt(0).toUpperCase() : '?';
     avatarBtn.innerHTML = '<img src="' + escapeHtml(forum.myAvatar) + '" alt="" class="w-full h-full rounded-full object-cover" onerror="this.remove();this.parentElement.textContent=\'' + initial + '\'" loading="lazy">';
@@ -414,11 +448,13 @@ function renderLeaderboard() {
       var u = users[i];
       var p = palettes[i % palettes.length];
       var dispName = u.displayName || u.name || u.username || 'Unknown';
+      var roleBadge = u.role ? getRoleBadge(u.role) : '';
       html += '<div class="leaderboard-row">' +
         '<div class="leaderboard-rank ' + p.bg + ' ' + p.color + '">' + (i + 1) + '</div>' +
         '<div class="flex-1 flex items-center gap-2">' +
           '<div class="w-6 h-6 rounded-full bg-gradient-to-br from-' + p.grad + '-400 to-' + p.grad + '-600 flex items-center justify-center text-[9px] font-bold text-white">' + dispName.charAt(0).toUpperCase() + '</div>' +
           '<span class="text-sm font-medium text-slate-300 truncate">' + escapeHtml(dispName) + '</span>' +
+          roleBadge +
         '</div>' +
         '<span class="text-sm font-bold text-cyan-400">' + (u.solved || u.score || 0) + '</span>' +
       '</div>';
@@ -428,15 +464,27 @@ function renderLeaderboard() {
 
   /* Try fetching real OJ data first */
   if (typeof supabaseClient !== 'undefined') {
-    supabaseClient.from('submissions').select('username, display_name, verdict, problem_id, score, max_score, created_at').then(function(res) {
-      if (res.error || !res.data || res.data.length === 0) {
+    Promise.all([
+      supabaseClient.from('submissions').select('username, display_name, verdict, problem_id, score, max_score, created_at'),
+      supabaseClient.from('users').select('username, role')
+    ]).then(function(resolved) {
+      var subRes = resolved[0];
+      var userRes = resolved[1];
+      if (subRes.error || !subRes.data || subRes.data.length === 0) {
         renderRows(VOID_DATA.leaderboard);
         return;
       }
+
+      /* Build role map */
+      var roleMap = {};
+      if (!userRes.error && userRes.data) {
+        userRes.data.forEach(function(u) { roleMap[u.username] = u.role || 'Member'; });
+      }
+
       var users = {};
-      res.data.forEach(function(s) {
+      subRes.data.forEach(function(s) {
         var uname = s.username || 'unknown';
-        if (!users[uname]) users[uname] = { username: uname, displayName: s.display_name || uname, solved: {}, totalScore: 0, totalMax: 0, lastSub: s.created_at };
+        if (!users[uname]) users[uname] = { username: uname, displayName: s.display_name || uname, solved: {}, totalScore: 0, totalMax: 0, lastSub: s.created_at, role: roleMap[uname] || 'Member' };
         var u = users[uname];
         if (s.verdict === 'AC' && s.problem_id) u.solved[s.problem_id] = true;
         u.totalScore += s.score || 0;
@@ -445,7 +493,7 @@ function renderLeaderboard() {
       });
       var ranked = Object.keys(users).map(function(k) {
         var u = users[k];
-        return { displayName: u.displayName, username: u.username, solved: Object.keys(u.solved).length, totalScore: u.totalScore, totalMax: u.totalMax, accuracy: u.totalMax > 0 ? Math.round(u.totalScore / u.totalMax * 100) : 0, lastSub: u.lastSub };
+        return { displayName: u.displayName, username: u.username, solved: Object.keys(u.solved).length, totalScore: u.totalScore, totalMax: u.totalMax, accuracy: u.totalMax > 0 ? Math.round(u.totalScore / u.totalMax * 100) : 0, lastSub: u.lastSub, role: u.role };
       });
       ranked.sort(function(a, b) {
         if (b.solved !== a.solved) return b.solved - a.solved;

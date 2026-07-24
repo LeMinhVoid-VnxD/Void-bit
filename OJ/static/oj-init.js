@@ -2,13 +2,46 @@ var OJ_SUPABASE_URL = 'https://amcuddpczwixylrlhxru.supabase.co';
 var OJ_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtY3VkZHBjendpeHlscmxoeHJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2OTk0NjksImV4cCI6MjEwMDI3NTQ2OX0.ruTbGNW8h6rJh21Lcl1LUFZVHR6SzuuKLoRxW91Duyk';
 var ojdb = supabase.createClient(OJ_SUPABASE_URL, OJ_SUPABASE_ANON_KEY);
 
+/* ================================================================
+   ROLE HIERARCHY (highest → lowest)
+   ================================================================ */
+var ROLES = [
+  { id:'Owner',   label:'Owner',  badge:'👑', level:9, color:'text-amber-400' },
+  { id:'Admin',   label:'Admin',  badge:'🛡️', level:8, color:'text-red-400' },
+  { id:'Co-Admin',label:'C-Adm',  badge:'⚔️', level:7, color:'text-orange-400' },
+  { id:'Dev',     label:'Dev',    badge:'💻', level:6, color:'text-cyan-400' },
+  { id:'Executor',label:'Exec',   badge:'⚡', level:5, color:'text-yellow-400' },
+  { id:'AI-Check',label:'AI-C',   badge:'🤖', level:4, color:'text-purple-400' },
+  { id:'Member',  label:'Member', badge:'👤', level:3, color:'text-slate-400' },
+  { id:'Skid',    label:'Skid',   badge:'🐍', level:2, color:'text-green-500' },
+  { id:'Vibe',    label:'Vibe',   badge:'🌊', level:1, color:'text-blue-300' },
+];
+
+function getRoleInfo(id) {
+  return ROLES.find(function(r) { return r.id === id; }) || ROLES[6]; // default Member
+}
+
+function hasRole(userRole, minRole) {
+  var u = getRoleInfo(userRole);
+  var m = getRoleInfo(minRole);
+  return u.level >= m.level;
+}
+
+function getRoleBadge(role) {
+  var r = getRoleInfo(role);
+  return '<span class="role-badge" style="color:' + r.color + ';font-size:0.7rem;font-weight:600">' + r.badge + ' ' + r.label + '</span>';
+}
+
+/* ================================================================ */
+
 function ojUser() {
   var token = localStorage.getItem('voidbit_session');
   if (!token) return null;
   return {
     username: localStorage.getItem('voidbit_username') || '',
     displayName: localStorage.getItem('voidbit_forum_name') || 'Anonymous',
-    avatar: localStorage.getItem('voidbit_forum_avatar') || ''
+    avatar: localStorage.getItem('voidbit_forum_avatar') || '',
+    role: localStorage.getItem('voidbit_role') || 'Member'
   };
 }
 

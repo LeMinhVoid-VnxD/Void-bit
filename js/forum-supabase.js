@@ -3,6 +3,48 @@
 //  Thread list + real-time messages + DM with Supabase Realtime.
 // ================================================================
 
+/* ================================================================
+   ROLE HIERARCHY (highest → lowest)
+   ================================================================ */
+var ROLES = [
+  { id:'Owner',   label:'Owner',  badge:'👑', level:9, color:'text-amber-400' },
+  { id:'Admin',   label:'Admin',  badge:'🛡️', level:8, color:'text-red-400' },
+  { id:'Co-Admin',label:'C-Adm',  badge:'⚔️', level:7, color:'text-orange-400' },
+  { id:'Dev',     label:'Dev',    badge:'💻', level:6, color:'text-cyan-400' },
+  { id:'Executor',label:'Exec',   badge:'⚡', level:5, color:'text-yellow-400' },
+  { id:'AI-Check',label:'AI-C',   badge:'🤖', level:4, color:'text-purple-400' },
+  { id:'Member',  label:'Member', badge:'👤', level:3, color:'text-slate-400' },
+  { id:'Skid',    label:'Skid',   badge:'🐍', level:2, color:'text-green-500' },
+  { id:'Vibe',    label:'Vibe',   badge:'🌊', level:1, color:'text-blue-300' },
+];
+
+function getRoleInfo(id) {
+  return ROLES.find(function(r) { return r.id === id; }) || ROLES[6];
+}
+
+function hasRole(userRole, minRole) {
+  var u = getRoleInfo(userRole);
+  var m = getRoleInfo(minRole);
+  return u.level >= m.level;
+}
+
+function getRoleBadge(role) {
+  var r = getRoleInfo(role);
+  return '<span class="role-badge" style="color:' + r.color + ';font-size:0.7rem;font-weight:600">' + r.badge + ' ' + r.label + '</span>';
+}
+
+var roleMap = {}; // username → role, populated once
+
+function ensureRoleMap(cb) {
+  if (Object.keys(roleMap).length > 0) { if (cb) cb(); return; }
+  supabaseClient.from('users').select('username, role').then(function(res) {
+    if (!res.error && res.data) {
+      res.data.forEach(function(u) { roleMap[u.username.toLowerCase()] = u.role || 'Member'; });
+    }
+    if (cb) cb();
+  });
+}
+
 var forum = {
   view: 'thread-list',
   threadId: null,
@@ -235,13 +277,14 @@ function renderThreadView(container) {
   lucide.createIcons();
 
   var listEl = $('#messageList');
-  supabaseClient.from('messages').select('*').eq('thread_id', forum.threadId).order('created_at', { ascending: true }).then(function(res) {
-    if (res.error) { if (listEl) listEl.innerHTML = '<p class="text-center text-red-400 py-8">Error.</p>'; return; }
-    if (res.data.length === 0) { if (listEl) listEl.innerHTML = '<div class="text-center text-slate-500 py-12"><p>' + t('forum.noMessages') + '</p></div>'; return; }
-    if (listEl) {
-      var html = '';
-      for (var i = 0; i < res.data.length; i++) html += buildMessageCard(res.data[i]);
-      listEl.innerHTML = html;
+  ensureRoleMap(function() {
+    supabaseClient.from('messages').select('*').eq('thread_id', forum.threadId).order('created_at', { ascending: true }).then(function(res) {
+      if (res.error) { if (listEl) listEl.innerHTML = '<p class="text-center text-red-400 py-8">Error.</p>'; return; }
+      if (res.data.length === 0) { if (listEl) listEl.innerHTML = '<div class="text-center text-slate-500 py-12"><p>' + t('forum.noMessages') + '</p></div>'; return; }
+      if (listEl) {
+        var html = '';
+        for (var i = 0; i < res.data.length; i++) html += buildMessageCard(res.data[i]);
+        listEl.innerHTML = html;
       var wrap = $('#messageWrap');
       if (wrap) wrap.scrollTop = wrap.scrollHeight;
       lucide.createIcons();
@@ -518,7 +561,7 @@ function loadRecentChats() {
 function loadAllUsers() {
   var container = $('#allUsersList');
   if (!container) return;
-  supabaseClient.from('users').select('username, display_name, avatar_url').then(function(res) {
+  supabaseClient.from('users').select('username, display_name, avatar_url, role').then(function(res) {
     if (res.error || !res.data) {
       container.innerHTML = '<p class="text-xs text-slate-600 text-center py-4">Error loading users.</p>';
       return;
@@ -529,11 +572,13 @@ function loadAllUsers() {
       var u = res.data[i];
       if (u.username === currentUser) continue;
       var displayName = u.display_name || u.username;
+      var roleInfo = (typeof getRoleInfo === 'function') ? getRoleInfo(u.role || 'Member') : null;
+      var roleBadge = roleInfo ? '<span style="color:' + roleInfo.color + ';font-size:0.65rem;font-weight:600;margin-left:4px">' + roleInfo.badge + '</span>' : '';
       html += '<div class="thread-card" onclick="openDM(\'' + escapeHtml(u.username) + '\')">' +
         '<div class="thread-card-left">' +
           getAvatarHtml(displayName, u.avatar_url || '', 9) +
           '<div class="min-w-0 flex-1">' +
-            '<p class="text-sm font-bold text-white truncate">' + escapeHtml(displayName) + '</p>' +
+            '<p class="text-sm font-bold text-white truncate">' + escapeHtml(displayName) + roleBadge + '</p>' +
             '<p class="text-[10px] text-slate-500">@' + escapeHtml(u.username) + '</p>' +
           '</div>' +
         '</div>' +
@@ -858,7 +903,8 @@ function registerUser(username, password, errEl) {
     username: username.toLowerCase(),
     password_hash: passHash,
     display_name: displayName,
-    avatar_url: ''
+    avatar_url: '',
+    role: 'Member'
   }).then(function(res) {
     if (res.error) {
       if (res.error.message && res.error.message.indexOf('duplicate') > -1) {
@@ -868,7 +914,7 @@ function registerUser(username, password, errEl) {
       }
       return;
     }
-    createSession(username, displayName, '');
+    createSession(username, displayName, '', 'Member');
     closeAuthModal();
     renderForum();
   });
@@ -885,18 +931,19 @@ function loginUser(username, password, errEl) {
       if (errEl) { errEl.textContent = t('forum.wrongPass'); errEl.classList.remove('hidden'); }
       return;
     }
-    createSession(username, res.data.display_name || username, res.data.avatar_url || '');
+    createSession(username, res.data.display_name || username, res.data.avatar_url || '', res.data.role || 'Member');
     closeAuthModal();
     renderForum();
   });
 }
 
-function createSession(username, displayName, avatarUrl) {
+function createSession(username, displayName, avatarUrl, role) {
   var token = hashStr(username + ':' + Date.now());
   localStorage.setItem('voidbit_session', token);
   localStorage.setItem('voidbit_username', username.toLowerCase());
   localStorage.setItem('voidbit_forum_name', displayName);
   localStorage.setItem('voidbit_forum_avatar', avatarUrl);
+  localStorage.setItem('voidbit_role', role || 'Member');
   forum.loggedIn = true;
   forum.myName = displayName;
   forum.myAvatar = avatarUrl;
@@ -907,6 +954,7 @@ function logoutUser() {
   localStorage.removeItem('voidbit_username');
   localStorage.removeItem('voidbit_forum_name');
   localStorage.removeItem('voidbit_forum_avatar');
+  localStorage.removeItem('voidbit_role');
   if (forum.presenceChannel) {
     supabaseClient.removeChannel(forum.presenceChannel);
     forum.presenceChannel = null;
@@ -1017,11 +1065,14 @@ function cleanupForum() {
 
 function buildMessageCard(m) {
   var timeStr = m.created_at ? formatTime(new Date(m.created_at)) : '';
+  var authorRole = roleMap[(m.author || '').toLowerCase()] || '';
+  var roleBadge = authorRole ? getRoleBadge(authorRole) : '';
   return '<div class="message-card" data-msg-id="' + (m.id || '') + '">' +
     getAvatarHtml(m.author, m.author === forum.myName ? forum.myAvatar : '', 8) +
     '<div class="flex-1 min-w-0">' +
-      '<div class="flex items-center gap-2">' +
+      '<div class="flex items-center gap-2 flex-wrap">' +
         '<span class="text-sm font-bold text-white">' + escapeHtml(m.author) + '</span>' +
+        roleBadge +
         '<span class="text-[10px] text-slate-600">' + timeStr + '</span>' +
       '</div>' +
       '<p class="text-sm text-slate-300 mt-1 leading-relaxed">' + escapeHtml(m.content) + '</p>' +

@@ -43,6 +43,7 @@
 //    password_hash TEXT NOT NULL,
 //    display_name TEXT NOT NULL DEFAULT '',
 //    avatar_url TEXT NOT NULL DEFAULT '',
+//    role TEXT NOT NULL DEFAULT 'Member',
 //    created_at TIMESTAMPTZ DEFAULT now()
 //  );
 //
