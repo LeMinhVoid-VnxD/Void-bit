@@ -5,14 +5,17 @@
 const VOID_DATA = {
 
   // ------------------------------------------------------------
-  //  COURSES
+  //  COURSES  (mapped from LESSONS.categories in lessons-data.js)
   // ------------------------------------------------------------
   courses: [
-    { id: 'cpp',      title: 'C++ Basics',         difficulty: 'easy',   lessons: 12, progress: 45, icon: 'code-2',         desc: 'Syntax, STL, I/O, pointers, and OOP fundamentals.' },
-    { id: 'ds',       title: 'Data Structures',     difficulty: 'medium', lessons: 18, progress: 30, icon: 'layers',        desc: 'Arrays, linked lists, trees, heaps, hash tables, graphs.' },
-    { id: 'algo',     title: 'Algorithms',          difficulty: 'hard',   lessons: 24, progress: 15, icon: 'git-branch',    desc: 'Sorting, searching, two pointers, binary search, greedy.' },
-    { id: 'dp',       title: 'Dynamic Programming', difficulty: 'hard',   lessons: 20, progress:  8, icon: 'cpu',           desc: 'Memoization, tabulation, tree DP, digit DP, optimizations.' },
-    { id: 'math',     title: 'Math for CP',         difficulty: 'medium', lessons: 15, progress: 22, icon: 'sigma',         desc: 'Number theory, combinatorics, modulo arithmetic, geometry.' }
+    { id: 'paradigms',     difficulty: 'hard',   lessons: 10, progress: 0, icon: 'cpu',          color: 'cyan' },
+    { id: 'linear-ds',     difficulty: 'easy',   lessons: 4,  progress: 0, icon: 'list',         color: 'emerald' },
+    { id: 'nonlinear-ds',  difficulty: 'medium', lessons: 3,  progress: 0, icon: 'share-2',      color: 'purple' },
+    { id: 'advanced-ds',   difficulty: 'hard',   lessons: 7,  progress: 0, icon: 'layers',       color: 'amber' },
+    { id: 'graph-algos',   difficulty: 'hard',   lessons: 8,  progress: 0, icon: 'git-branch',   color: 'purple' },
+    { id: 'math',          difficulty: 'medium', lessons: 4,  progress: 0, icon: 'sigma',        color: 'rose' },
+    { id: 'string',        difficulty: 'medium', lessons: 4,  progress: 0, icon: 'type',         color: 'blue' },
+    { id: 'optimizations', difficulty: 'easy',   lessons: 3,  progress: 0, icon: 'zap',          color: 'cyan' }
   ],
 
   // ------------------------------------------------------------
@@ -271,14 +274,17 @@ const VOID_DATA = {
   ],
 
   // ------------------------------------------------------------
-  //  LEADERBOARD
+  //  LEADERBOARD  (fallback if Supabase query fails)
   // ------------------------------------------------------------
   leaderboard: [
-    { name: 'minh_tri',    score: 2847 },
-    { name: 'nguyen_lam',  score: 2612 },
-    { name: 'cp_pro',      score: 2435 },
-    { name: 'zero_cool',   score: 2201 },
-    { name: 'binary_hack', score: 1987 }
+    { name: 'void_admin',  score: 3200 },
+    { name: 'cp_master',   score: 2850 },
+    { name: 'algowizard',  score: 2540 },
+    { name: 'dp_king',     score: 2310 },
+    { name: 'graph_hacker',score: 2100 },
+    { name: 'math_whiz',   score: 1920 },
+    { name: 'str_ninja',   score: 1750 },
+    { name: 'bit_bender',  score: 1580 }
   ],
 
   // ------------------------------------------------------------

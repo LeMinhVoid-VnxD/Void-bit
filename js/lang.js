@@ -19,6 +19,7 @@ var LANG = {
     'nav.lessons':      'Lessons',
     'nav.forum':        'Forum',
     'nav.chat':         'Chat',
+    'nav.oj':           'OJ',
 
     // Auth
     'auth.tagline':     'Sign in to start learning Competitive Programming',
@@ -107,6 +108,7 @@ var LANG = {
     'lesson.explanation': 'Explanation',
     'lesson.functions':   'Key Functions',
     'lesson.code':        'Sample Code',
+    'lesson.videos':      'Video Tutorials',
     'lesson.problems':    'Practice Problems',
     'lesson.coming':      'Practice problems coming soon.',
     'lesson.topics':      'Topics',
@@ -198,6 +200,7 @@ var LANG = {
     'nav.lessons':      'Bài giảng',
     'nav.forum':        'Diễn đàn',
     'nav.chat':         'Chat',
+    'nav.oj':           'OJ',
 
     // Auth
     'auth.tagline':     'Đăng nhập để bắt đầu học Lập trình thi đấu',
@@ -286,6 +289,7 @@ var LANG = {
     'lesson.explanation': 'Giải thích',
     'lesson.functions':   'Các hàm quan trọng',
     'lesson.code':        'Code mẫu',
+    'lesson.videos':      'Video hướng dẫn',
     'lesson.problems':    'Bài tập thực hành',
     'lesson.coming':      'Bài tập thực hành đang cập nhật.',
     'lesson.topics':      'Chủ đề',

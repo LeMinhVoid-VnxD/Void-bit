@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OJ — Void-bit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="OJ/static/style.css">
+  <style>
+    body { padding-top: 4rem; background: var(--bg-primary); }
+    .view { display: none; }
+    .view.active { display: block; }
+    .view.hidden { display: none; }
+    .oj-toolbar { background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 8px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .oj-toolbar .nav-link { font-size: 13px; font-weight: 500; color: var(--text-secondary); padding: 6px 14px; border-radius: 6px; transition: var(--transition); text-decoration: none; }
+    .oj-toolbar .nav-link:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+    .oj-toolbar .nav-link.active { color: var(--primary); background: var(--primary-glow); }
+    .oj-toolbar .nav-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+    .oj-toolbar .nav-actions button { font-size: 12px; color: var(--text-secondary); padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border-color); background: transparent; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; }
+    .oj-toolbar .nav-actions button:hover { color: var(--text-primary); border-color: var(--primary); background: var(--primary-glow); }
+    .toast-container { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 20px 24px; }
+    @media (max-width: 768px) {
+      .oj-toolbar .nav-actions button span { display: none; }
+      .problem-detail-layout { flex-direction: column; }
+      .submit-column { width: 100% !important; }
+      .container { padding: 12px; }
+    }
+  </style>
+</head>
+<body style="display:block">
+
+  <!-- Void-bit Navbar -->
+  <nav class="glass fixed top-0 left-0 right-0 z-50 h-16" style="background: rgba(15,23,42,.85);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg accent-bg flex items-center justify-center">
+          <span class="text-[#0b1120] font-extrabold text-sm">{ }</span>
+        </div>
+        <span class="text-xl font-extrabold tracking-tight text-white">Void<span class="accent">-bit</span> <span style="font-weight:400;font-size:13px;color:#8a99ad;margin-left:4px">/ OJ</span></span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- OJ Toolbar -->
+  <div class="oj-toolbar">
+    <a href="#/problems" class="nav-link active" id="nav-problems"><i data-lucide="code-2" style="width:16px;height:16px"></i> Bài tập</a>
+    <a href="#/contests" class="nav-link" id="nav-contests"><i data-lucide="award" style="width:16px;height:16px"></i> Luyện đề</a>
+    <div class="nav-actions">
+      <button onclick="reloadProblems()" class="btn-reload"><i data-lucide="rotate-cw" id="reload-icon" style="width:14px;height:14px"></i> <span>Đồng bộ</span></button>
+      <button onclick="openGenerateModal()" class="btn-generate"><i data-lucide="wand-2" style="width:14px;height:14px"></i> <span>Tạo đề</span></button>
+      <button onclick="openSettings()" class="btn-settings"><i data-lucide="settings" style="width:14px;height:14px"></i></button>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Main Container -->
+  <main class="container">
+
+    <!-- view 1: Problems List -->
+    <section id="view-problems" class="view active">
+      <div class="section-header">
+        <div class="header-title-area">
+          <h2>Danh sách bài tập</h2>
+          <p class="subtitle">Hãy giải các bài tập lập trình bên dưới để rèn luyện tư duy</p>
+        </div>
+      </div>
+      <div class="filter-bar">
+        <div class="category-tabs" id="categoryTabs">
+          <button class="tab-btn active" onclick="filterCategory('all')">Tất cả</button>
+          <button class="tab-btn" onclick="filterCategory('dp')">Quy hoạch động</button>
+          <button class="tab-btn" onclick="filterCategory('binary_search')">Chặt nhị phân</button>
+          <button class="tab-btn" onclick="filterCategory('greedy')">Tham lam</button>
+          <button class="tab-btn" onclick="filterCategory('graph')">Đồ thị</button>
+          <button class="tab-btn" onclick="filterCategory('math')">Toán học</button>
+          <button class="tab-btn" onclick="filterCategory('string')">Xử lý xâu</button>
+          <button class="tab-btn" onclick="filterCategory('data_structure')">Cấu trúc dữ liệu</button>
+          <button class="tab-btn" onclick="filterCategory('other')">Khác</button>
+        </div>
+        <div class="search-box">
+          <i data-lucide="search"></i>
+          <input type="text" id="searchInput" placeholder="Tìm tên bài..." oninput="handleSearch()">
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="problems-table">
+          <thead>
+            <tr>
+              <th style="width:80px">Trạng thái</th>
+              <th>Tên bài tập</th>
+              <th style="width:180px">Chủ đề</th>
+              <th style="width:120px">Độ khó</th>
+              <th style="width:90px">Rating</th>
+              <th style="width:120px">Subtasks</th>
+              <th style="width:120px">Số testcase</th>
+            </tr>
+          </thead>
+          <tbody id="problemsTableBody">
+            <tr class="skeleton-row"><td colspan="7"><div class="skeleton"></div></td></tr>
+            <tr class="skeleton-row"><td colspan="7"><div class="skeleton"></div></td></tr>
+            <tr class="skeleton-row"><td colspan="7"><div class="skeleton"></div></td></tr>
+          </tbody>
+        </table>
+        <div id="noProblemsMessage" class="no-data hidden">
+          <i data-lucide="folder-open"></i>
+          <p>Không tìm thấy bài tập nào phù hợp.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- view 2: Problem Detail -->
+    <section id="view-problem-detail" class="view hidden">
+      <div class="problem-detail-layout">
+        <article class="statement-column">
+          <div class="card statement-card">
+            <button onclick="navigateTo('problems')" class="btn-back"><i data-lucide="arrow-left"></i> Quay lại</button>
+            <h1 id="prob-title" class="prob-title">Tải dữ liệu...</h1>
+            <div class="meta-pills">
+              <span class="meta-pill" id="prob-difficulty">Medium</span>
+              <span class="meta-pill" id="prob-cf-rating" style="display:none">Rating: -</span>
+              <span class="meta-pill" id="prob-category">DP</span>
+              <span class="meta-pill"><i data-lucide="clock"></i> Giới hạn thời gian: <span id="prob-time-limit">1.0s</span></span>
+              <span class="meta-pill"><i data-lucide="cpu"></i> Bộ nhớ: <span id="prob-memory-limit">256MB</span></span>
+            </div>
+            <div class="divider"></div>
+            <div class="statement-section"><h3>Mô tả bài toán</h3><div id="prob-description" class="rich-text"></div></div>
+            <div class="statement-section" id="section-input-format"><h3>Định dạng đầu vào</h3><div id="prob-input-format" class="rich-text"></div></div>
+            <div class="statement-section" id="section-output-format"><h3>Định dạng đầu ra</h3><div id="prob-output-format" class="rich-text"></div></div>
+            <div class="statement-section" id="section-constraints"><h3>Ràng buộc</h3><div id="prob-constraints" class="rich-text"></div></div>
+            <div class="statement-section" id="section-subtasks"><h3>Subtasks</h3><div class="subtask-list" id="prob-subtasks"></div></div>
+            <div class="statement-section" id="section-samples"><h3>Ví dụ minh hoạ</h3><div id="prob-samples"></div></div>
+            <div class="statement-section">
+              <h3>Hỗ trợ giải bài</h3>
+              <div class="solution-buttons">
+                <button onclick="requestSolutionHint()" class="btn btn-hint"><i data-lucide="lightbulb"></i> Hướng dẫn giải</button>
+                <button onclick="requestSolutionCode()" class="btn btn-code"><i data-lucide="code"></i> Code giải</button>
+              </div>
+              <div id="solution-result" class="solution-result hidden">
+                <div class="solution-result-header">
+                  <span id="solution-result-title">Hướng dẫn giải</span>
+                  <button onclick="closeSolutionResult()" class="btn-close"><i data-lucide="x"></i></button>
+                </div>
+                <div id="solution-result-body" class="solution-result-body rich-text"></div>
+              </div>
+            </div>
+          </div>
+        </article>
+        <aside class="submit-column">
+          <div class="card submit-card sticky-panel">
+            <div class="panel-header"><h2>Nộp bài giải</h2></div>
+            <div class="form-group">
+              <label for="languageSelect">Ngôn ngữ dịch</label>
+              <select id="languageSelect" class="form-control">
+                <option value="cpp">C++17 (GCC 9.2.0)</option>
+                <option value="python">Python 3 (3.8.1)</option>
+                <option value="java">Java (OpenJDK 13.0.1)</option>
+              </select>
+            </div>
+            <div class="form-group editor-group">
+              <div class="editor-header">
+                <label>Mã nguồn</label>
+                <div class="editor-actions">
+                  <button class="editor-action-btn" onclick="clearEditor()" title="Xoá sạch"><i data-lucide="trash-2"></i></button>
+                  <button class="editor-action-btn" onclick="copyFromClipboard()" title="Dán từ Clipboard"><i data-lucide="clipboard"></i></button>
+                </div>
+              </div>
+              <div class="editor-wrapper">
+                <textarea id="codeEditor" placeholder="// Nhập code C++ của bạn ở đây..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+              </div>
+            </div>
+            <button onclick="handleCodeSubmit()" class="btn-submit-code" id="btnSubmit"><i data-lucide="send"></i> Nộp bài (Ctrl+Enter)</button>
+            <div id="quickResultBox" class="quick-result-box hidden">
+              <div class="quick-result-header">
+                <span class="result-title">Kết quả chấm điểm</span>
+                <span id="quickVerdict" class="verdict-text WA">Wrong Answer</span>
+              </div>
+              <div class="score-display-area">
+                <span class="score-label">Điểm số:</span>
+                <span class="score-value" id="quickScore">60 / 100</span>
+              </div>
+              <div class="progress-bar-container"><div class="progress-bar-fill" id="quickScoreProgress" style="width:60%"></div></div>
+              <div class="subtask-results-mini" id="quickSubtaskResults"></div>
+              <button onclick="showDetailedResultModal()" class="btn-detail-result">Xem chi tiết các testcase <i data-lucide="arrow-right"></i></button>
+            </div>
+            <div class="chat-section-submit" id="chatPanel">
+              <div class="chat-drag-handle" id="chatDragHandle"><span class="chat-size-label" id="chatSizeLabel">615px</span></div>
+              <div class="chat-header-left-panel"><i data-lucide="bot" style="width:16px;height:16px"></i><span>Hỏi đáp AI</span></div>
+              <div class="chat-messages" id="chatMessages">
+                <div class="chat-msg chat-msg-ai"><div class="chat-msg-content">Xin chào! Tôi có thể giúp gì về bài tập này?</div></div>
+              </div>
+              <div class="chat-input-area">
+                <textarea id="chatInput" rows="2" placeholder="Nhập câu hỏi..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"></textarea>
+                <button onclick="sendChatMessage()" class="chat-send-btn" id="chatSendBtn"><i data-lucide="send"></i></button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- view 3: Contests List -->
+    <section id="view-contests" class="view hidden">
+      <div class="section-header">
+        <div class="header-title-area">
+          <h2>Danh sách đề thi HSG</h2>
+          <p class="subtitle">Thử sức với các bộ đề thi thử theo đúng định dạng học sinh giỏi</p>
+        </div>
+      </div>
+      <div class="table-container">
+        <table class="problems-table">
+          <thead>
+            <tr>
+              <th>Đề thi</th>
+              <th style="width:120px">Số bài</th>
+              <th style="width:150px">Thời gian làm bài</th>
+              <th style="width:150px">Thang điểm</th>
+              <th style="width:150px;text-align:center">Hành động</th>
+            </tr>
+          </thead>
+          <tbody id="contestsTableBody">
+            <tr class="skeleton-row"><td colspan="5"><div class="skeleton"></div></td></tr>
+          </tbody>
+        </table>
+        <div id="noContestsMessage" class="no-data hidden">
+          <i data-lucide="award"></i>
+          <p>Không tìm thấy đề thi nào.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- view 4: Contest Detail -->
+    <section id="view-contest-detail" class="view hidden">
+      <div class="contest-banner">
+        <div class="contest-info-left">
+          <h2 id="contest-title">Đề thi HSG...</h2>
+          <div class="contest-pills">
+            <span class="meta-pill"><i data-lucide="clock"></i> Thời gian: <span id="contest-time-limit">150 phút</span></span>
+            <span class="meta-pill"><i data-lucide="award"></i> Thang điểm: <span id="contest-max-score">20 điểm</span></span>
+            <span class="meta-pill" id="contest-status-pill"><i data-lucide="play-circle"></i> Trạng thái: Chưa bắt đầu</span>
+          </div>
+        </div>
+        <div class="contest-info-right">
+          <div class="contest-timer-box" id="contestTimerBox">
+            <span class="timer-label">Thời gian còn lại</span>
+            <span class="timer-value" id="contestTimer">--:--:--</span>
+          </div>
+          <button id="btnContestAction" onclick="handleContestAction()" class="btn-primary" style="padding:10px 20px"><i data-lucide="play"></i> Bắt đầu làm bài</button>
+        </div>
+      </div>
+      <div class="contest-scoreboard-bar hidden" id="contestScoreboardBar">
+        <div class="scoreboard-title">Bảng điểm hiện tại:</div>
+        <div class="scoreboard-items" id="contestScoreboardItems"></div>
+        <div class="scoreboard-total">Tổng điểm: <span id="contestTotalScore">0</span> / <span id="contestTotalMaxScore">20</span></div>
+      </div>
+      <div class="problem-detail-layout hidden" id="contestMainLayout">
+        <article class="statement-column">
+          <div class="card statement-card" style="padding-top:16px">
+            <div class="contest-problem-tabs" id="contestProblemTabs"></div>
+            <h1 id="contest-prob-title" class="prob-title" style="margin-top:16px">Tên bài...</h1>
+            <div class="meta-pills">
+              <span class="meta-pill" id="contest-prob-difficulty">Medium</span>
+              <span class="meta-pill" id="contest-prob-cf-rating" style="display:none">Rating: -</span>
+              <span class="meta-pill"><i data-lucide="clock"></i> Giới hạn: <span id="contest-prob-time-limit">1.0s</span></span>
+              <span class="meta-pill"><i data-lucide="cpu"></i> Bộ nhớ: <span id="contest-prob-memory-limit">256MB</span></span>
+              <span class="meta-pill" id="contest-prob-points-pill" style="border-color:var(--warning-border);background:var(--warning-bg);color:var(--warning);font-weight:600">Điểm tối đa: 5đ</span>
+            </div>
+            <div class="divider"></div>
+            <div class="statement-section"><h3>Mô tả bài toán</h3><div id="contest-prob-description" class="rich-text"></div></div>
+            <div class="statement-section" id="contest-section-input-format"><h3>Định dạng đầu vào</h3><div id="contest-prob-input-format" class="rich-text"></div></div>
+            <div class="statement-section" id="contest-section-output-format"><h3>Định dạng đầu ra</h3><div id="contest-prob-output-format" class="rich-text"></div></div>
+            <div class="statement-section" id="contest-section-constraints"><h3>Ràng buộc</h3><div id="contest-prob-constraints" class="rich-text"></div></div>
+            <div class="statement-section" id="contest-section-subtasks"><h3>Subtasks</h3><div class="subtask-list" id="contest-prob-subtasks"></div></div>
+            <div class="statement-section" id="contest-section-samples"><h3>Ví dụ minh hoạ</h3><div id="contest-prob-samples"></div></div>
+          </div>
+        </article>
+        <aside class="submit-column">
+          <div class="card submit-card sticky-panel">
+            <div class="panel-header"><h2>Nộp bài giải</h2></div>
+            <div class="form-group">
+              <label for="contestLanguageSelect">Ngôn ngữ dịch</label>
+              <select id="contestLanguageSelect" class="form-control">
+                <option value="cpp">C++17 (GCC 9.2.0)</option>
+                <option value="python">Python 3 (3.8.1)</option>
+                <option value="java">Java (OpenJDK 13.0.1)</option>
+              </select>
+            </div>
+            <div class="form-group editor-group">
+              <div class="editor-header">
+                <label>Mã nguồn</label>
+                <div class="editor-actions">
+                  <button class="editor-action-btn" onclick="clearContestEditor()" title="Xoá sạch"><i data-lucide="trash-2"></i></button>
+                  <button class="editor-action-btn" onclick="copyFromClipboardContest()" title="Dán từ Clipboard"><i data-lucide="clipboard"></i></button>
+                </div>
+              </div>
+              <div class="editor-wrapper">
+                <textarea id="contestCodeEditor" placeholder="// Nhập code C++..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+              </div>
+            </div>
+            <button onclick="handleContestCodeSubmit()" class="btn-submit-code" id="btnContestSubmit"><i data-lucide="send"></i> Nộp bài (Ctrl+Enter)</button>
+            <div id="contestQuickResultBox" class="quick-result-box hidden">
+              <div class="quick-result-header">
+                <span class="result-title">Kết quả chấm điểm</span>
+                <span id="contestQuickVerdict" class="verdict-text WA">Wrong Answer</span>
+              </div>
+              <div class="score-display-area">
+                <span class="score-label">Điểm bài này:</span>
+                <span class="score-value" id="contestQuickScore">0.0 / 0.0</span>
+              </div>
+              <div class="progress-bar-container"><div class="progress-bar-fill" id="contestQuickScoreProgress" style="width:0%"></div></div>
+              <div class="subtask-results-mini" id="contestQuickSubtaskResults"></div>
+              <button onclick="showDetailedResultModal()" class="btn-detail-result">Xem chi tiết <i data-lucide="arrow-right"></i></button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <!-- Settings Modal -->
+  <div id="modal-settings" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Cài đặt môi trường</h2>
+        <button class="modal-close-btn" onclick="closeSettings()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="settings-editor-size">Cỡ chữ Editor</label>
+          <select id="settings-editor-size" class="form-control" onchange="applySettings()">
+            <option value="13px">13 px</option><option value="14px" selected>14 px</option>
+            <option value="15px">15 px</option><option value="16px">16 px</option><option value="18px">18 px</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="settings-tab-size">Độ rộng Tab (Spaces)</label>
+          <select id="settings-tab-size" class="form-control" onchange="applySettings()">
+            <option value="2">2 spaces</option><option value="4" selected>4 spaces</option><option value="8">8 spaces</option>
+          </select>
+        </div>
+        <p style="font-size:0.8em;color:var(--text-muted);margin:0">Hệ thống chấm bài sử dụng <strong>Wandbox API</strong> miễn phí, không cần cấu hình.</p>
+        <div class="divider" style="margin:16px 0"></div>
+        <h3 style="font-size:1em;margin-bottom:12px;color:var(--primary-hover);border-left:3px solid var(--primary);padding-left:8px">Cấu hình AI (mặc định)</h3>
+        <div class="form-group">
+          <label for="settings-ai-provider">Nhà cung cấp AI</label>
+          <select id="settings-ai-provider" class="form-control" onchange="populateSettingsAIModels();applySettings()">
+            <option value="openai">OpenAI (GPT)</option><option value="claude">Claude (Anthropic)</option>
+            <option value="gemini">Gemini (Google)</option><option value="deepseek">DeepSeek</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="settings-ai-model">Model</label>
+          <select id="settings-ai-model" class="form-control" onchange="applySettings()"></select>
+        </div>
+        <div class="form-group">
+          <label for="settings-ai-key">API Key</label>
+          <input type="password" id="settings-ai-key" class="form-control" placeholder="sk-..." autocomplete="off" onchange="applySettings()">
+        </div>
+        <p class="settings-info-text"><i data-lucide="info" style="width:14px;height:14px;display:inline;vertical-align:middle;margin-right:4px"></i> Cấu hình AI sẽ được dùng cho tạo đề, hướng dẫn giải và code giải.</p>
+        <div class="divider" style="margin:16px 0"></div>
+        <div class="form-group" style="display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="settings-auto-request" onchange="applySettings()">
+          <label for="settings-auto-request" style="margin:0;cursor:pointer">Tự động gửi yêu cầu hướng dẫn khi mở bài</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="closeSettings()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate Modal -->
+  <div id="modal-generate" class="modal-overlay hidden" onclick="if(event.target===this)closeGenerateModal()">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div>
+          <h2>Tạo đề bằng AI</h2>
+          <p class="modal-subtitle">Nhập API key và chọn thông số để AI sinh bài tập tự động</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeGenerateModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="generate-form-grid">
+          <div class="form-group">
+            <label for="gen-provider">Nhà cung cấp AI</label>
+            <select id="gen-provider" class="form-control" onchange="onProviderChange()">
+              <option value="openai">OpenAI (GPT)</option><option value="claude">Claude (Anthropic)</option>
+              <option value="gemini">Gemini (Google)</option><option value="deepseek">DeepSeek</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="gen-model">Model</label>
+            <select id="gen-model" class="form-control" onchange="saveGenerateConfig()"></select>
+          </div>
+          <div class="form-group">
+            <label for="gen-api-key">API Key</label>
+            <input type="password" id="gen-api-key" class="form-control" placeholder="sk-..." autocomplete="off" onchange="saveGenerateConfig()">
+          </div>
+          <div class="form-group">
+            <label for="gen-category">Thể loại</label>
+            <select id="gen-category" class="form-control" onchange="updateGenSubTypes()">
+              <option value="">-- Chọn thể loại --</option>
+              <option value="toan">Toán học</option><option value="chat_nhi_phan">Chặt nhị phân</option>
+              <option value="dp">Quy hoạch động (DP)</option><option value="tham_lam">Tham lam</option>
+              <option value="do_thi">Đồ thị</option><option value="cau_truc_du_lieu">Cấu trúc dữ liệu</option>
+              <option value="xau_ky_tu">Xử lý xâu</option><option value="khac">Khác</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="gen-sub-type">Dạng cụ thể</label>
+            <select id="gen-sub-type" class="form-control" onchange="saveGenerateConfig()">
+              <option value="">-- Chọn thể loại trước --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="gen-rating">Độ khó (CF Rating)</label>
+            <select id="gen-rating" class="form-control" onchange="saveGenerateConfig()">
+              <option value="">-- Mặc định (AI tự chọn) --</option>
+              <option value="easy">Easy (&lt;1000)</option><option value="medium">Medium (1000-1499)</option>
+              <option value="hard">Hard (1500-1999)</option><option value="hardcore">Hardcore (2000-2499)</option>
+              <option value="ioi">IOI-ICPC (2500-3000)</option><option value="only-ai">Only AI (&gt;3000)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="gen-subtask-count">Số subtask</label>
+            <select id="gen-subtask-count" class="form-control" onchange="saveGenerateConfig()">
+              <option value="1">1 subtask</option><option value="2">2 subtasks</option><option value="3" selected>3 subtasks</option>
+              <option value="4">4 subtasks</option><option value="5">5 subtasks</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end">
+            <button onclick="handleGenerateProblem()" class="btn-generate-submit" id="btnGenSubmit"><i data-lucide="wand-2"></i> Sinh đề</button>
+          </div>
+        </div>
+        <div id="gen-result-area" class="hidden" style="margin-top:20px;padding:16px;border-radius:8px;background:var(--bg-secondary)">
+          <div id="gen-result-loading" class="hidden" style="text-align:center;padding:20px">
+            <i data-lucide="loader" class="spinning" style="width:32px;height:32px"></i>
+            <p style="margin-top:8px;color:var(--text-secondary)">Đang sinh đề... Vui lòng đợi (30-60 giây)</p>
+          </div>
+          <div id="gen-result-success" class="hidden">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--success);margin-bottom:8px"><i data-lucide="check-circle-2"></i><strong>Sinh đề thành công!</strong></div>
+            <p id="gen-result-title" style="margin:4px 0"></p><p id="gen-result-meta" style="margin:4px 0;font-size:0.9em;color:var(--text-secondary)"></p>
+            <a id="gen-result-link" href="#" style="display:inline-block;margin-top:8px" onclick="openGeneratedProblem(event)">Xem bài tập mới →</a>
+          </div>
+          <div id="gen-result-error" class="hidden">
+            <div style="display:flex;align-items:center;gap:8px;color:var(--danger);margin-bottom:8px"><i data-lucide="alert-triangle"></i><strong>Lỗi!</strong></div>
+            <p id="gen-result-error-text" style="margin:0;color:var(--text-secondary)"></p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="closeGenerateModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Modal -->
+  <div id="modal-results" class="modal-overlay hidden">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div>
+          <h2 id="modal-result-title">Chi tiết chấm bài</h2>
+          <p class="modal-subtitle" id="modal-result-subtitle">Bài: Tìm kiếm phần tử</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeDetailedResultModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="summary-verdict-card">
+          <div class="verdict-badge-large" id="modalVerdictLarge">Accepted</div>
+          <div class="verdict-points-display">
+            <span class="points-label">Tổng điểm</span>
+            <span class="points-nums" id="modalPoints">100 / 100</span>
+          </div>
+        </div>
+        <div id="compileErrorContainer" class="compile-error-card hidden">
+          <h4>Thông tin lỗi biên dịch (Compiler Output):</h4>
+          <pre id="compileErrorText"></pre>
+        </div>
+        <div class="modal-section-title">Kết quả theo Subtask</div>
+        <div class="table-container">
+          <table class="subtask-results-table">
+            <thead><tr>
+              <th>Subtask ID</th><th>Điểm số</th><th>Yêu cầu ràng buộc</th><th>Trạng thái</th><th>Testcase đúng</th>
+            </tr></thead>
+            <tbody id="modalSubtaskTableBody"></tbody>
+          </table>
+        </div>
+        <div class="modal-section-title">Danh sách Testcase chi tiết</div>
+        <div class="testcases-detail-list" id="modalTestcaseList"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="closeDetailedResultModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="OJ/static/script.js"></script>
+  <script>
+    // ======================================================================
+    // Wandbox API Helpers
+    // ======================================================================
+    var WANDBOX_COMPILERS = { cpp: 'gcc-13.1.0', python: 'python3-10.0', java: 'openjdk-java-18.0.1' };
+
+    async function wandboxSubmit(code, compiler, stdin) {
+      var resp = await fetch('https://wandbox.org/api/compile.json', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ compiler: compiler, code: code, stdin: stdin, 'compiler-option-raw': '-O2', save: false })
+      });
+      if (!resp.ok) throw new Error('Wandbox error (' + resp.status + ')');
+      return await resp.json();
+    }
+
+    function wandboxVerdict(res, timeLimit) {
+      if (res.status !== '0') {
+        if (res.signal && parseInt(res.signal) !== 0) return 'RE';
+        return 'CE';
+      }
+      if (res.time && timeLimit) {
+        var sec = parseFloat(res.time.replace('s', ''));
+        if (sec > timeLimit) return 'TLE';
+      }
+      return 'OK'; // caller compares output
+    }
+
+    function normalizeOutput(s) {
+      return (s || '').replace(/\r\n/g, '\n').replace(/\s+$/, '').trim();
+    }
+
+    // ======================================================================
+    // Wandbox-based handleCodeSubmit
+    // ======================================================================
+    async function wandboxHandleSubmit(prefix) {
+      var prob = window.currentProblem;
+      if (!prob) return;
+
+      var code = document.getElementById(prefix + 'CodeEditor');
+      var langSel = document.getElementById(prefix + 'LanguageSelect');
+      var btn = document.getElementById(prefix + 'BtnSubmit');
+      var box = document.getElementById(prefix + 'QuickResultBox');
+      var verdictEl = document.getElementById(prefix + 'QuickVerdict');
+      var scoreEl = document.getElementById(prefix + 'QuickScore');
+      var progressEl = document.getElementById(prefix + 'QuickScoreProgress');
+      var subtaskEl = document.getElementById(prefix + 'QuickSubtaskResults');
+
+      if (!code || !code.value.trim()) {
+        if (typeof showToast === 'function') showToast('Vui lòng viết mã nguồn trước khi nộp bài!', 'error');
+        return;
+      }
+
+      var lang = langSel ? langSel.value : 'cpp';
+      var compiler = WANDBOX_COMPILERS[lang];
+      if (!compiler) {
+        if (typeof showToast === 'function') showToast('Ngôn ngữ không được Wandbox hỗ trợ', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader" class="spinning"></i> Đang chấm...';
+      if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+
+      box.classList.remove('hidden');
+      box.style.display = 'block';
+      verdictEl.className = 'verdict-text JUDGING';
+      verdictEl.textContent = 'Judging...';
+      scoreEl.textContent = '- / -';
+      progressEl.style.width = '0%';
+      subtaskEl.innerHTML = '';
+
+      try {
+        var testCases = prob.test_cases || [];
+        var timeLimit = prob.time_limit || 2;
+        var totalTC = testCases.length;
+
+        if (totalTC === 0) {
+          var r = await wandboxSubmit(code.value, compiler, '');
+          var v = wandboxVerdict(r, timeLimit);
+          if (v === 'OK') v = 'AC';
+          lastJudgeResult = {
+            verdict: v, score: v === 'AC' ? 100 : 0, max_score: 100,
+            compile_error: r.compiler_error || r.program_error || '',
+            passed: v === 'AC' ? 1 : 0, total: 1,
+            subtask_results: [{ id: 1, status: v, points: v === 'AC' ? 100 : 0, max_points: 100 }]
+          };
+          if (typeof displayQuickResult === 'function') displayQuickResult(lastJudgeResult);
+          if (typeof saveLocalProblemStatus === 'function') saveLocalProblemStatus(prob.id, lastJudgeResult);
+          return;
+        }
+
+        // Submit test cases sequentially
+        var tcResults = [];
+        for (var i = 0; i < totalTC; i++) {
+          verdictEl.textContent = 'Chấm... (' + (i + 1) + '/' + totalTC + ')';
+          var tc = testCases[i];
+          var r = await wandboxSubmit(code.value, compiler, tc.input);
+
+          var v;
+          if (r.status !== '0') {
+            if (r.signal && parseInt(r.signal) !== 0) v = 'RE'; else v = 'CE';
+          } else {
+            if (r.time && timeLimit > 0 && parseFloat(r.time.replace('s','')) > timeLimit) { v = 'TLE'; }
+            else if (normalizeOutput(r.program_output) === normalizeOutput(tc.output)) { v = 'AC'; }
+            else { v = 'WA'; }
+          }
+
+          tcResults.push({ index: i, verdict: v, time: r.time, stderr: r.compiler_error || r.program_error || '' });
+          if (v === 'CE') break; // stop on compile error
+          await new Promise(function(res) { setTimeout(res, 300); });
+        }
+
+        // Check compile error
+        var hasCE = tcResults.some(function(r) { return r.verdict === 'CE'; });
+        if (hasCE) {
+          var ceInfo = tcResults.find(function(r) { return r.verdict === 'CE'; });
+          var subs = (prob.subtasks || [{ id: 1, points: 100 }]).map(function(s) {
+            return { id: s.id, status: 'CE', points: 0, max_points: s.points };
+          });
+          lastJudgeResult = {
+            verdict: 'CE', score: 0, max_score: subs.reduce(function(a, s) { return a + s.max_points; }, 0),
+            compile_error: ceInfo ? ceInfo.stderr : 'Compilation error',
+            passed: 0, total: totalTC, subtask_results: subs
+          };
+          if (typeof displayQuickResult === 'function') displayQuickResult(lastJudgeResult);
+          if (typeof saveLocalProblemStatus === 'function') saveLocalProblemStatus(prob.id, lastJudgeResult);
+          return;
+        }
+
+        // Aggregate by subtask
+        var subtasks = prob.subtasks || [{ id: 1, points: 100 }];
+        var subtaskResults = subtasks.map(function(sub) {
+          var subTCs = [];
+          for (var i = 0; i < tcResults.length; i++) {
+            if (testCases[tcResults[i].index].subtask === sub.id) subTCs.push(tcResults[i]);
+          }
+          var passed = 0;
+          for (var i = 0; i < subTCs.length; i++) { if (subTCs[i].verdict === 'AC') passed++; }
+          var total = subTCs.length;
+          var status = passed === total ? 'AC' : (passed > 0 ? 'ATT' : 'WA');
+          var points = total > 0 ? Math.round((passed / total) * sub.points) : 0;
+          return { id: sub.id, status: status, points: points, max_points: sub.points };
+        });
+
+        var totalPoints = 0;
+        for (var i = 0; i < subtaskResults.length; i++) { totalPoints += subtaskResults[i].points; }
+        var maxPoints = 0;
+        for (var i = 0; i < subtasks.length; i++) { maxPoints += subtasks[i].points; }
+        var totalPassed = 0;
+        for (var i = 0; i < tcResults.length; i++) { if (tcResults[i].verdict === 'AC') totalPassed++; }
+        var allAC = totalPassed === totalTC;
+
+        lastJudgeResult = {
+          verdict: allAC ? 'AC' : (totalPoints > 0 ? 'ATT' : 'WA'),
+          score: totalPoints, max_score: maxPoints,
+          passed: totalPassed, total: totalTC, subtask_results: subtaskResults
+        };
+        if (typeof displayQuickResult === 'function') displayQuickResult(lastJudgeResult);
+        if (typeof saveLocalProblemStatus === 'function') saveLocalProblemStatus(prob.id, lastJudgeResult);
+
+      } catch (e) {
+        console.error('Wandbox error:', e);
+        if (typeof showToast === 'function') showToast('Lỗi chấm: ' + e.message, 'error');
+        verdictEl.className = 'verdict-text WA';
+        verdictEl.textContent = 'Chấm lỗi';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="send"></i> Nộp bài (Ctrl+Enter)';
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+      }
+    }
+
+    // ======================================================================
+    // Override — run immediately after OJ script loads (before DOMContentLoaded)
+    // ======================================================================
+
+    // Static JSON fetch overrides
+    window.fetchProblems = async function() {
+      try {
+        var resp = await fetch('OJ/problems/problems-index.json');
+        if (!resp.ok) throw new Error('Không thể tải danh sách bài tập');
+        problemsList = await resp.json();
+        return problemsList;
+      } catch (e) {
+        console.error('fetchProblems error:', e);
+        return [];
+      }
+    };
+
+    window.fetchProblemDetail = async function(id) {
+      try {
+        var resp = await fetch('OJ/problems/' + id + '.json');
+        if (!resp.ok) throw new Error('Không thể tải bài tập');
+        return await resp.json();
+      } catch (e) {
+        console.error('fetchProblemDetail error:', e);
+        return null;
+      }
+    };
+
+    // Completely replace settings functions (originals reference removed elements)
+    window.loadSettingsToUI = function() {
+      var raw = localStorage.getItem('oj_local_settings');
+      try {
+        var s = raw ? JSON.parse(raw) : {};
+        var el;
+        el = document.getElementById('settings-editor-size'); if (el) el.value = s.editorSize || '14px';
+        el = document.getElementById('settings-tab-size'); if (el) el.value = s.tabSize || '4';
+        el = document.getElementById('settings-ai-provider'); if (el && s.aiProvider) el.value = s.aiProvider;
+        if (typeof populateSettingsAIModels === 'function') populateSettingsAIModels(s.aiModel);
+        el = document.getElementById('settings-ai-key'); if (el && s.aiKey) el.value = s.aiKey;
+        el = document.getElementById('settings-auto-request');
+        if (el) el.checked = s.autoRequest !== false;
+      } catch(e) { console.error('loadSettingsToUI error:', e); }
+    };
+
+    window.saveSettings = function() {
+      try {
+        var s = {};
+        var el;
+        el = document.getElementById('settings-editor-size'); if (el) s.editorSize = el.value;
+        el = document.getElementById('settings-tab-size'); if (el) s.tabSize = el.value;
+        el = document.getElementById('settings-ai-provider'); if (el) s.aiProvider = el.value;
+        el = document.getElementById('settings-ai-model'); if (el) s.aiModel = el.value;
+        el = document.getElementById('settings-ai-key'); if (el) s.aiKey = el.value;
+        el = document.getElementById('settings-auto-request'); if (el) s.autoRequest = el.checked;
+        localStorage.setItem('oj_local_settings', JSON.stringify(s));
+      } catch(e) { console.error('saveSettings error:', e); }
+    };
+
+    window.applySettings = function() {
+      var size = document.getElementById('settings-editor-size');
+      var tab = document.getElementById('settings-tab-size');
+      var editor = document.getElementById('codeEditor');
+      if (size && editor) editor.style.fontSize = size.value;
+      if (tab && editor) editor.style.tabSize = tab.value;
+      if (typeof window.saveSettings === 'function') window.saveSettings();
+    };
+
+    // Wandbox-based submission
+    window.handleCodeSubmit = function() { wandboxHandleSubmit(''); };
+    window.handleContestCodeSubmit = function() { wandboxHandleSubmit('contest'); };
+
+    // AI features (no backend)
+    window.handleGenerateProblem = function() {
+      document.getElementById('gen-result-area').classList.remove('hidden');
+      document.getElementById('gen-result-area').style.display = 'block';
+      document.getElementById('gen-result-loading').classList.add('hidden');
+      document.getElementById('gen-result-loading').style.display = 'none';
+      document.getElementById('gen-result-success').classList.add('hidden');
+      document.getElementById('gen-result-success').style.display = 'none';
+      document.getElementById('gen-result-error').classList.remove('hidden');
+      document.getElementById('gen-result-error').style.display = 'block';
+      document.getElementById('gen-result-error-text').textContent = 'Cần chạy OJ Server (oj_server.exe) để dùng AI generate.';
+    };
+    window.requestSolutionHint = function() {
+      var el = document.getElementById('solution-result');
+      el.classList.remove('hidden');
+      el.style.display = 'block';
+      document.getElementById('solution-result-title').textContent = 'Hướng dẫn giải';
+      document.getElementById('solution-result-body').innerHTML = '<p style="color:#8a99ad">Cần chạy OJ Server (oj_server.exe) để dùng tính năng này.</p>';
+    };
+    window.requestSolutionCode = function() {
+      var el = document.getElementById('solution-result');
+      el.classList.remove('hidden');
+      el.style.display = 'block';
+      document.getElementById('solution-result-title').textContent = 'Code giải';
+      document.getElementById('solution-result-body').innerHTML = '<p style="color:#8a99ad">Cần chạy OJ Server (oj_server.exe) để dùng tính năng này.</p>';
+    };
+
+    // DOMContentLoaded — no extra setup needed (Wandbox is configuration-free)
+
+    if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+  </script>
+</body>
+</html>

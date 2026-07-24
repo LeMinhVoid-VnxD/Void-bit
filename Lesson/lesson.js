@@ -116,6 +116,30 @@ function renderContent(cat, lesson, lessonIdx, catIdx) {
 
   html += lesson.content;
 
+  // Videos section
+  if (lesson.videos && lesson.videos.length > 0) {
+    html += '<div class="lesson-section"><h4>' + (typeof t === 'function' ? t('lesson.videos') : 'Video Tutorials') + '</h4><div class="lesson-videos">';
+    for (var i = 0; i < lesson.videos.length; i++) {
+      var v = lesson.videos[i];
+      var vid = '';
+      var m = v.url.match(/(?:v=|\/)([\w-]{10,12})(?:\?|$)/);
+      if (m) vid = m[1];
+      if (vid) {
+        html += '<div class="lesson-video-item">' +
+          '<a href="' + v.url + '" target="_blank" class="lesson-video-link-block">' +
+          '<div class="lesson-video-wrapper">' +
+            '<img src="https://img.youtube.com/vi/' + vid + '/mqdefault.jpg" alt="" loading="lazy" onerror="this.style.display=\'none\'">' +
+          '</div>' +
+          '<div class="lesson-video-title">' + v.title + '</div>' +
+          '</a>' +
+        '</div>';
+      } else {
+        html += '<a href="' + v.url + '" target="_blank" class="lesson-video-link">' + v.title + '</a>';
+      }
+    }
+    html += '</div></div>';
+  }
+
   // Problems section
   if (lesson.problems && lesson.problems.length > 0) {
     html += '<div class="lesson-section"><h4>' + (typeof t === 'function' ? t('lesson.problems') : 'Practice Problems') + '</h4><div class="lesson-problems">';

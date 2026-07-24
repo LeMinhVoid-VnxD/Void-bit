@@ -234,6 +234,70 @@ body {
 .lesson-section .code-sample::-webkit-scrollbar { height: 4px; }
 .lesson-section .code-sample::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
 
+/* ---------- VIDEOS ---------- */
+.lesson-videos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.lesson-video-item {
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid rgba(51, 65, 85, 0.3);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.lesson-video-item:hover {
+  border-color: rgba(0, 240, 255, 0.25);
+}
+.lesson-video-link-block {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.lesson-video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  background: #0d1421;
+  overflow: hidden;
+}
+.lesson-video-wrapper img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.lesson-video-title {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+  text-decoration: none;
+}
+.lesson-video-link-block:hover .lesson-video-title {
+  color: #00f0ff;
+}
+.lesson-video-link {
+  display: block;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #00f0ff;
+  text-decoration: none;
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid rgba(51, 65, 85, 0.3);
+  border-radius: 10px;
+  transition: all 0.2s;
+}
+.lesson-video-link:hover {
+  background: rgba(0, 240, 255, 0.08);
+  border-color: rgba(0, 240, 255, 0.3);
+}
+
 /* ---------- PROBLEMS ---------- */
 .lesson-problems {
   display: grid;

@@ -1,0 +1,1 @@
+{"problem_id":"ai_dp_13800530","type":"code","reply":"3]=1, dp[4]=1. -> 1 cách.\n  Nếu nhảy 1, 2, 3, 4 bậc?\n  Không hỏng: dp[4] = 8.\n  Bậc 2 hỏng: dp[0]=1, dp[1]=1, dp[2]=0, dp[3]=2, dp[4]=dp[3]+dp[2]+dp[1]+dp[0] = 2+0+1+1 = 4.\n  A! Nếu có thể nhảy tới 4 bậc? Nhưng đề bài ghi \"1 bậc, 2 bậc hoặc 3 bậc\".\n  Nếu đề ghi \"1 bậc, 2 bậc hoặc ","time":"1784015406"}

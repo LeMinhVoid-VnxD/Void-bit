@@ -56,6 +56,8 @@ function showAuthGate() {
           '<div id="authExtra" style="display:none">' +
             '<div><label style="font-size:0.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px">' + t('forum.displayName') + '</label>' +
             '<input type="text" id="authDisplayName" maxlength="20" style="width:100%;padding:10px 16px;border-radius:8px;background:rgba(30,41,59,0.5);border:1px solid rgba(51,65,85,0.5);font-size:0.875rem;color:#fff;outline:none;box-sizing:border-box" placeholder="' + t('forum.nickname') + '"></div>' +
+            '<div><label style="font-size:0.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px">' + t('forum.avatarUrl') + '</label>' +
+            '<input type="text" id="authAvatar" maxlength="500" style="width:100%;padding:10px 16px;border-radius:8px;background:rgba(30,41,59,0.5);border:1px solid rgba(51,65,85,0.5);font-size:0.875rem;color:#fff;outline:none;box-sizing:border-box" placeholder="https://example.com/avatar.jpg"></div>' +
           '</div>' +
           '<button id="gateSubmitBtn" onclick="gateSubmit()" style="width:100%;padding:10px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#00f0ff,#3b82f6);color:#fff;font-size:0.875rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center">' + t('forum.login') + '</button>' +
           '<p id="gateError" style="font-size:0.75rem;color:#f87171;text-align:center;display:none;margin:0"></p>' +
@@ -97,12 +99,13 @@ function gateSubmit() {
 
 function gateRegister(username, password, errEl) {
   var displayName = ($('#authDisplayName') || {}).value || username;
+  var avatarUrl = ($('#authAvatar') || {}).value || '';
   var passHash = hashStr(password);
   supabaseClient.from('users').insert({
     username: username.toLowerCase(),
     password_hash: passHash,
     display_name: displayName,
-    avatar_url: ''
+    avatar_url: avatarUrl
   }).then(function(res) {
     if (res.error) {
       if (res.error.message && res.error.message.indexOf('duplicate') > -1) {
@@ -112,7 +115,7 @@ function gateRegister(username, password, errEl) {
       }
       return;
     }
-    gateCreateSession(username, displayName, '');
+    gateCreateSession(username, displayName, avatarUrl);
     hideAuthGate();
     location.reload();
   });
@@ -290,28 +293,32 @@ function renderCourses() {
   if (!container) return;
 
   var courses = VOID_DATA.courses;
+  var completed = {};
+  try { completed = JSON.parse(localStorage.getItem('voidbit_completed_lessons') || '{}'); } catch(e) {}
   var html = '';
   for (var i = 0; i < courses.length; i++) {
     var c = courses[i];
     var badgeCls = c.difficulty === 'easy'   ? 'badge-easy'   :
                    c.difficulty === 'medium' ? 'badge-medium' : 'badge-hard';
     var badgeLabel = t('diff.' + c.difficulty);
+    var done = completed[c.id] || 0;
+    var pct = c.lessons > 0 ? Math.round(done / c.lessons * 100) : 0;
+    var color = c.color || 'cyan';
 
     html += '<div class="card p-5 cursor-pointer group course-card" data-course="' + c.id + '">' +
       '<div class="flex items-start justify-between mb-3">' +
-        '<div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">' +
-          '<i data-lucide="' + c.icon + '" class="w-5 h-5 text-cyan-400"></i>' +
+        '<div class="w-10 h-10 rounded-xl bg-' + color + '-500/10 border border-' + color + '-500/20 flex items-center justify-center group-hover:bg-' + color + '-500/20 transition-colors">' +
+          '<i data-lucide="' + c.icon + '" class="w-5 h-5 text-' + color + '-400"></i>' +
         '</div>' +
         '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ' + badgeCls + '">' + badgeLabel + '</span>' +
       '</div>' +
-      '<h3 class="text-lg font-bold text-white mb-1">' + t('course.' + c.id) + '</h3>' +
-      '<p class="text-xs text-slate-500 mb-4">' + t('course.' + c.id + '.desc') + '</p>' +
+      '<h3 class="text-lg font-bold text-white mb-1">' + t('cat.' + c.id) + '</h3>' +
+      '<p class="text-xs text-slate-500 mb-4">' + done + '/' + c.lessons + ' ' + t('courses.lessons') + '</p>' +
       '<div class="flex items-center justify-between mb-2">' +
-        '<span class="text-xs text-slate-500"><span class="text-slate-300 font-semibold">' + c.lessons + '</span> ' + t('courses.lessons') + '</span>' +
-        '<span class="text-xs text-slate-500">' + c.progress + '%</span>' +
+        '<span class="text-xs text-slate-500">' + pct + '%</span>' +
       '</div>' +
-      '<div class="progress-bar"><div class="progress-fill bg-gradient-to-r from-cyan-500 to-blue-500" style="width:' + c.progress + '%"></div></div>' +
-      '<div class="mt-3 text-center"><span class="text-xs font-medium text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity">' + t('courses.view') + '</span></div>' +
+      '<div class="progress-bar"><div class="progress-fill bg-gradient-to-r from-' + color + '-500 to-blue-500" style="width:' + pct + '%"></div></div>' +
+      '<div class="mt-3 text-center"><span class="text-xs font-medium text-' + color + '-400 opacity-0 group-hover:opacity-100 transition-opacity">' + t('courses.view') + '</span></div>' +
     '</div>';
   }
   container.innerHTML = html;
@@ -348,17 +355,25 @@ function renderLeaderboard() {
   if (!container) return;
 
   var users = VOID_DATA.leaderboard;
-  var rowColors  = ['text-amber-400','text-slate-300','text-amber-600','text-slate-500','text-slate-500'];
-  var rowBgs     = ['bg-amber-400/20 border-amber-400/30','bg-slate-300/20 border-slate-300/30','bg-amber-600/20 border-amber-600/30','bg-slate-500/20 border-slate-500/30','bg-slate-500/20 border-slate-500/30'];
-  var gradients  = ['amber','blue','purple','cyan','emerald'];
+  var palettes = [
+    { color: 'text-amber-400', bg: 'bg-amber-400/20 border-amber-400/30', grad: 'amber' },
+    { color: 'text-slate-300', bg: 'bg-slate-300/20 border-slate-300/30', grad: 'blue' },
+    { color: 'text-amber-600', bg: 'bg-amber-600/20 border-amber-600/30', grad: 'purple' },
+    { color: 'text-cyan-400', bg: 'bg-cyan-400/20 border-cyan-400/30', grad: 'cyan' },
+    { color: 'text-emerald-400', bg: 'bg-emerald-400/20 border-emerald-400/30', grad: 'emerald' },
+    { color: 'text-slate-400', bg: 'bg-slate-400/20 border-slate-400/30', grad: 'slate' },
+    { color: 'text-slate-400', bg: 'bg-slate-400/20 border-slate-400/30', grad: 'gray' },
+    { color: 'text-slate-400', bg: 'bg-slate-400/20 border-slate-400/30', grad: 'stone' },
+  ];
   var html = '';
 
   for (var i = 0; i < users.length; i++) {
     var u = users[i];
+    var p = palettes[i % palettes.length];
     html += '<div class="leaderboard-row">' +
-      '<div class="leaderboard-rank ' + rowBgs[i] + ' ' + rowColors[i] + '">' + (i + 1) + '</div>' +
+      '<div class="leaderboard-rank ' + p.bg + ' ' + p.color + '">' + (i + 1) + '</div>' +
       '<div class="flex-1 flex items-center gap-2">' +
-        '<div class="w-6 h-6 rounded-full bg-gradient-to-br from-' + gradients[i] + '-400 to-' + gradients[i] + '-600 flex items-center justify-center text-[9px] font-bold text-white">' + u.name.charAt(0).toUpperCase() + '</div>' +
+        '<div class="w-6 h-6 rounded-full bg-gradient-to-br from-' + p.grad + '-400 to-' + p.grad + '-600 flex items-center justify-center text-[9px] font-bold text-white">' + u.name.charAt(0).toUpperCase() + '</div>' +
         '<span class="text-sm font-medium text-slate-300">' + u.name + '</span>' +
       '</div>' +
       '<span class="text-sm font-bold text-cyan-400">' + u.score + '</span>' +
