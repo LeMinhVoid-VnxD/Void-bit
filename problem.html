@@ -440,18 +440,24 @@
         var tcs = prob.test_cases || [];
         if (tcs.length === 0) { ojToast('Không có test case', 'error'); btn.disabled = false; btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Nộp bài'; return; }
 
-        var results = [];
+        /* Render all pills as running */
+        vEl.textContent = 'Đang chấm ' + tcs.length + ' testcase...';
         for (var i = 0; i < tcs.length; i++) {
-          vEl.textContent = 'Đang chấm test #' + (i+1) + '/' + tcs.length + '...';
-          
-          /* Render running pill */
           var tempPill = document.createElement('span');
           tempPill.id = 'pill_' + i;
           tempPill.className = 'testcase-pill RUNNING';
           tempPill.textContent = '#' + (i+1);
           pillsEl.appendChild(tempPill);
+        }
 
-          var r = await wandboxSubmit(code.value, compiler, tcs[i].input);
+        /* Submit all test cases in parallel */
+        var rawResults = await Promise.all(tcs.map(function(tc) {
+          return wandboxSubmit(code.value, compiler, tc.input);
+        }));
+
+        var results = [];
+        for (var i = 0; i < tcs.length; i++) {
+          var r = rawResults[i];
           var v = 'WA';
           if (r.status === '0') {
             var t = r.time ? parseFloat(r.time.replace('s','')) : 0;
@@ -474,7 +480,6 @@
             dEl.innerHTML += '<div class="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400 text-xs font-mono overflow-x-auto mt-2"><div class="font-bold mb-1">Lỗi thông điệp (' + v + '):</div>' + esc(results[results.length-1].stderr) + '</div>';
             break;
           }
-          await new Promise(function(r) { setTimeout(r, 150); });
         }
 
         var ac = results.filter(function(r){return r.v==='AC';}).length;
