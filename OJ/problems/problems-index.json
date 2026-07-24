@@ -2,7 +2,7 @@
   {
     "id": "ai_chat_nhi_phan_56031592",
     "title": "Truy tìm giá trị trong dãy đơn điệu",
-    "category": "chat_nhi_phan",
+    "category": "binary_search",
     "difficulty": "easy",
     "cf_rating": 900,
     "time_limit": 1,
@@ -13,7 +13,7 @@
   {
     "id": "ai_chat_nhi_phan_56502342",
     "title": "Dãy số nhị phân kỳ bí",
-    "category": "chat_nhi_phan",
+    "category": "binary_search",
     "difficulty": "easy",
     "cf_rating": 900,
     "time_limit": 1,
@@ -24,7 +24,7 @@
   {
     "id": "ai_chat_nhi_phan_66438795",
     "title": "Vị trí của giá trị",
-    "category": "chat_nhi_phan",
+    "category": "binary_search",
     "difficulty": "medium",
     "cf_rating": 1200,
     "time_limit": 1,
@@ -35,7 +35,7 @@
   {
     "id": "ai_do_thi_25238089",
     "title": "Vũ điệu của các siêu đồ thị (Hyper-Eulerian Tour)",
-    "category": "do_thi",
+    "category": "graph",
     "difficulty": "hard",
     "cf_rating": 3200,
     "time_limit": 1,
@@ -156,7 +156,7 @@
   {
     "id": "ai_toan_35569589",
     "title": "Số nguyên tố mạnh và ước số",
-    "category": "toan",
+    "category": "math",
     "difficulty": "hard",
     "cf_rating": 1600,
     "time_limit": 1,
@@ -167,7 +167,7 @@
   {
     "id": "ai_toan_35597565",
     "title": "Tổng ước số lũy thừa",
-    "category": "toan",
+    "category": "math",
     "difficulty": "hard",
     "cf_rating": 1600,
     "time_limit": 1,
@@ -178,7 +178,7 @@
   {
     "id": "ai_toan_40394272",
     "title": "Tổng các ước số của số nguyên tố",
-    "category": "toan",
+    "category": "math",
     "difficulty": "hard",
     "cf_rating": 1600,
     "time_limit": 1,
@@ -189,7 +189,7 @@
   {
     "id": "ai_toan_40529596",
     "title": "Tổng dãy con chia hết cho K",
-    "category": "toan",
+    "category": "math",
     "difficulty": "hard",
     "cf_rating": 1600,
     "time_limit": 1,
@@ -200,7 +200,7 @@
   {
     "id": "ai_toan_41166626",
     "title": "Tổng các số nguyên tố trong đoạn",
-    "category": "toan",
+    "category": "math",
     "difficulty": "hard",
     "cf_rating": 1600,
     "time_limit": 1,
@@ -211,7 +211,7 @@
   {
     "id": "ai_toan_41193401",
     "title": "Tổng các ước số của số nguyên tố",
-    "category": "toan",
+    "category": "math",
     "difficulty": "hard",
     "cf_rating": 1600,
     "time_limit": 1,
@@ -222,7 +222,7 @@
   {
     "id": "ai_toan_55797947",
     "title": "Cặp số thần kỳ",
-    "category": "toan",
+    "category": "math",
     "difficulty": "easy",
     "cf_rating": 800,
     "time_limit": 1,
@@ -233,7 +233,7 @@
   {
     "id": "ai_toan_75390586",
     "title": "Tổng các ước số nguyên tố",
-    "category": "toan",
+    "category": "math",
     "difficulty": "medium",
     "cf_rating": 1200,
     "time_limit": 1,
@@ -244,7 +244,7 @@
   {
     "id": "ai_toan_75441719",
     "title": "Tổng ước số lũy thừa",
-    "category": "toan",
+    "category": "math",
     "difficulty": "hard",
     "cf_rating": 2200,
     "time_limit": 1,
@@ -255,7 +255,7 @@
   {
     "id": "ai_toan_75827912",
     "title": "Tổng các ước số của lũy thừa",
-    "category": "toan",
+    "category": "math",
     "difficulty": "hard",
     "cf_rating": 1600,
     "time_limit": 1,
@@ -266,7 +266,7 @@
   {
     "id": "ai_toan_75865676",
     "title": "Tổng đoạn con chia hết cho K",
-    "category": "toan",
+    "category": "math",
     "difficulty": "medium",
     "cf_rating": 1200,
     "time_limit": 1,
@@ -277,7 +277,7 @@
   {
     "id": "ai_toan_77612652",
     "title": "Tổng dãy số cách đều",
-    "category": "toan",
+    "category": "math",
     "difficulty": "medium",
     "cf_rating": 1200,
     "time_limit": 1,
