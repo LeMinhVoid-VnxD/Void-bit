@@ -52,8 +52,10 @@ function navigateTo(target, id = '') {
 // API Calls & Data Fetching
 // ==========================================================================
 async function fetchProblems() {
+  console.log('[fetchProblems] PROBLEMS_INDEX:', typeof PROBLEMS_INDEX, PROBLEMS_INDEX ? PROBLEMS_INDEX.length : 'N/A');
   if (typeof PROBLEMS_INDEX !== 'undefined' && PROBLEMS_INDEX) {
     problemsList = PROBLEMS_INDEX;
+    console.log('[fetchProblems] assigned, count:', problemsList.length);
     return PROBLEMS_INDEX;
   }
   try {
@@ -69,7 +71,9 @@ async function fetchProblems() {
 }
 
 async function fetchProblemDetail(id) {
+  console.log('[fetchProblemDetail] id:', id, 'PROBLEMS_ALL:', typeof PROBLEMS_ALL);
   if (typeof PROBLEMS_ALL !== 'undefined' && PROBLEMS_ALL && PROBLEMS_ALL[id]) {
+    console.log('[fetchProblemDetail] found in embedded data');
     return PROBLEMS_ALL[id];
   }
   try {
@@ -145,7 +149,10 @@ function renderTableSkeleton() {
 function renderProblemsTable() {
   const body = document.getElementById('problemsTableBody');
   const noData = document.getElementById('noProblemsMessage');
+  const debugEl = document.getElementById('debugCount');
   body.innerHTML = '';
+  console.log('[renderProblemsTable] problemsList:', problemsList ? problemsList.length : 'null/undefined');
+  if (debugEl) debugEl.textContent = problemsList ? problemsList.length + ' bài tập' : 'đang tải...';
   
   // Filter problems
   const filtered = problemsList.filter(p => {
