@@ -354,7 +354,6 @@ function renderLeaderboard() {
   var container = $('#leaderboardContainer');
   if (!container) return;
 
-  var users = VOID_DATA.leaderboard;
   var palettes = [
     { color: 'text-amber-400', bg: 'bg-amber-400/20 border-amber-400/30', grad: 'amber' },
     { color: 'text-slate-300', bg: 'bg-slate-300/20 border-slate-300/30', grad: 'blue' },
@@ -365,21 +364,58 @@ function renderLeaderboard() {
     { color: 'text-slate-400', bg: 'bg-slate-400/20 border-slate-400/30', grad: 'gray' },
     { color: 'text-slate-400', bg: 'bg-slate-400/20 border-slate-400/30', grad: 'stone' },
   ];
-  var html = '';
 
-  for (var i = 0; i < users.length; i++) {
-    var u = users[i];
-    var p = palettes[i % palettes.length];
-    html += '<div class="leaderboard-row">' +
-      '<div class="leaderboard-rank ' + p.bg + ' ' + p.color + '">' + (i + 1) + '</div>' +
-      '<div class="flex-1 flex items-center gap-2">' +
-        '<div class="w-6 h-6 rounded-full bg-gradient-to-br from-' + p.grad + '-400 to-' + p.grad + '-600 flex items-center justify-center text-[9px] font-bold text-white">' + u.name.charAt(0).toUpperCase() + '</div>' +
-        '<span class="text-sm font-medium text-slate-300">' + u.name + '</span>' +
-      '</div>' +
-      '<span class="text-sm font-bold text-cyan-400">' + u.score + '</span>' +
-    '</div>';
+  function renderRows(users) {
+    var html = '';
+    for (var i = 0; i < users.length; i++) {
+      var u = users[i];
+      var p = palettes[i % palettes.length];
+      var dispName = u.displayName || u.name || u.username || 'Unknown';
+      html += '<div class="leaderboard-row">' +
+        '<div class="leaderboard-rank ' + p.bg + ' ' + p.color + '">' + (i + 1) + '</div>' +
+        '<div class="flex-1 flex items-center gap-2">' +
+          '<div class="w-6 h-6 rounded-full bg-gradient-to-br from-' + p.grad + '-400 to-' + p.grad + '-600 flex items-center justify-center text-[9px] font-bold text-white">' + dispName.charAt(0).toUpperCase() + '</div>' +
+          '<span class="text-sm font-medium text-slate-300 truncate">' + escapeHtml(dispName) + '</span>' +
+        '</div>' +
+        '<span class="text-sm font-bold text-cyan-400">' + (u.solved || u.score || 0) + '</span>' +
+      '</div>';
+    }
+    container.innerHTML = html;
   }
-  container.innerHTML = html;
+
+  /* Try fetching real OJ data first */
+  if (typeof supabaseClient !== 'undefined') {
+    supabaseClient.from('submissions').select('username, display_name, verdict, problem_id, score, max_score, created_at').then(function(res) {
+      if (res.error || !res.data || res.data.length === 0) {
+        renderRows(VOID_DATA.leaderboard);
+        return;
+      }
+      var users = {};
+      res.data.forEach(function(s) {
+        var uname = s.username || 'unknown';
+        if (!users[uname]) users[uname] = { username: uname, displayName: s.display_name || uname, solved: {}, totalScore: 0, totalMax: 0, lastSub: s.created_at };
+        var u = users[uname];
+        if (s.verdict === 'AC' && s.problem_id) u.solved[s.problem_id] = true;
+        u.totalScore += s.score || 0;
+        u.totalMax += s.max_score || 0;
+        if (s.created_at > u.lastSub) u.lastSub = s.created_at;
+      });
+      var ranked = Object.keys(users).map(function(k) {
+        var u = users[k];
+        return { displayName: u.displayName, username: u.username, solved: Object.keys(u.solved).length, totalScore: u.totalScore, totalMax: u.totalMax, accuracy: u.totalMax > 0 ? Math.round(u.totalScore / u.totalMax * 100) : 0, lastSub: u.lastSub };
+      });
+      ranked.sort(function(a, b) {
+        if (b.solved !== a.solved) return b.solved - a.solved;
+        if (b.accuracy !== a.accuracy) return b.accuracy - a.accuracy;
+        return new Date(a.lastSub) - new Date(b.lastSub);
+      });
+      renderRows(ranked.slice(0, 8));
+    }).catch(function() {
+      renderRows(VOID_DATA.leaderboard);
+    });
+  } else {
+    renderRows(VOID_DATA.leaderboard);
+  }
 }
 
 // ----------------------------------------------------------------
