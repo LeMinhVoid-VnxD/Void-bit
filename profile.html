@@ -34,6 +34,8 @@
     .btn-edit { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border-color); background: transparent; color: var(--text-primary); font-size: 0.8rem; cursor: pointer; }
     .btn-edit:hover { border-color: var(--primary); color: var(--primary); }
     .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
+    .role-select { padding: 4px 8px; border-radius: 6px; background: rgba(30,41,59,0.8); border: 1px solid rgba(51,65,85,0.5); color: #e2e8f0; font-size: 0.8rem; outline: none; cursor: pointer; }
+    .role-select:focus { border-color: #00f0ff; }
   </style>
 </head>
 <body>
@@ -92,6 +94,11 @@
 
       <div class="stat-grid" id="statGrid"></div>
 
+      <div id="userManagementSection" style="display:none;margin-bottom:24px">
+        <div class="section-title">👑 Quản lý người dùng</div>
+        <div class="table-container" id="userManagementTable"></div>
+      </div>
+
       <div class="section-title">Lịch sử nộp bài gần đây</div>
       <div class="table-container">
         <table class="problems-table" id="recentSubsTable">
@@ -136,13 +143,16 @@
           var u = res.data;
           currentUser.displayName = u.display_name || user.displayName;
           currentUser.avatar = u.avatar_url || user.avatar;
+          currentUser.role = u.role || 'Member';
           localStorage.setItem('voidbit_forum_name', currentUser.displayName);
           localStorage.setItem('voidbit_forum_avatar', currentUser.avatar);
+          localStorage.setItem('voidbit_role', currentUser.role);
         }
       } catch(e) {}
 
       renderProfile();
       loadStatsAndSubs();
+      renderUserManagement();
     }
 
     function renderProfile() {
@@ -193,6 +203,59 @@
       } catch(e) {
         ojToast('Lỗi kết nối', 'error');
       }
+    }
+
+    function canManageRole(currentRole, targetRole) {
+      var c = getRoleInfo(currentRole);
+      var t = getRoleInfo(targetRole);
+      if (!c || !t) return false;
+      if (c.id === 'Owner') return true;
+      if (c.id === 'Admin') return t.level < c.level && t.level > 0;
+      return false;
+    }
+
+    function renderUserManagement() {
+      var section = document.getElementById('userManagementSection');
+      if (!section) return;
+      var role = currentUser.role || 'Member';
+      if (!canManageRole(role, 'Member')) { section.style.display = 'none'; return; }
+      section.style.display = 'block';
+
+      ojdb.from('users').select('username, display_name, role').then(function(res) {
+        var container = document.getElementById('userManagementTable');
+        if (res.error || !res.data) { container.innerHTML = '<p class="text-red-400 text-sm">Lỗi tải dữ liệu</p>'; return; }
+        var html = '<table class="problems-table"><thead><tr><th>Username</th><th>Display Name</th><th>Role</th><th>Hành động</th></tr></thead><tbody>';
+        res.data.forEach(function(u) {
+          var currentTargetRole = u.role || 'Member';
+          var canEdit = canManageRole(role, currentTargetRole) || (role === 'Owner' && currentTargetRole !== 'Owner');
+          var roleOptions = '';
+          ROLES.forEach(function(r) {
+            var allowed = role === 'Owner' || (role === 'Admin' && r.level < getRoleInfo(role).level);
+            if (allowed) roleOptions += '<option value="' + r.id + '"' + (r.id === currentTargetRole ? ' selected' : '') + '>' + r.badge + ' ' + r.label + '</option>';
+          });
+          html += '<tr>' +
+            '<td><span class="text-sm font-medium text-slate-200">' + esc(u.username) + '</span></td>' +
+            '<td><span class="text-sm text-slate-400">' + esc(u.display_name || u.username) + '</span></td>' +
+            '<td>' + getRoleBadge(currentTargetRole) + '</td>' +
+            '<td>' + (canEdit ? '<select class="role-select" data-user="' + esc(u.username) + '" onchange="updateUserRole(this)">' + roleOptions + '</select>' : '<span class="text-xs text-slate-500">—</span>') + '</td>' +
+            '</tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      });
+    }
+
+    async function updateUserRole(sel) {
+      var username = sel.dataset.user;
+      var newRole = sel.value;
+      var oldRole = sel.options[sel.selectedIndex].defaultSelected ? sel.options[sel.selectedIndex].text : '';
+      if (!confirm('Chuyển role của "' + username + '" thành ' + newRole + '?')) { sel.value = sel.querySelector('[selected]') ? sel.querySelector('[selected]').value : 'Member'; return; }
+      try {
+        var res = await ojdb.from('users').update({ role: newRole }).eq('username', username);
+        if (res.error) { ojToast('Lỗi: ' + res.error.message, 'error'); return; }
+        ojToast('Đã cập nhật role ' + username + ' → ' + newRole, 'success');
+        renderUserManagement();
+      } catch(e) { ojToast('Lỗi kết nối', 'error'); }
     }
 
     async function loadStatsAndSubs() {
