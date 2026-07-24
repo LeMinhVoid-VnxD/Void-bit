@@ -172,6 +172,7 @@
         return;
       }
       renderProblem(PROBLEMS_ALL[id]);
+      loadBestScore(id);
     });
 
     function renderProblem(p) {
@@ -229,6 +230,9 @@
                   '</button>' +
                 '</div>' +
               '</div>' +
+
+              /* Best Score Bar */
+              '<div id="bestScoreBar" class="px-4 py-1.5 bg-slate-900/40 border-b border-slate-800/60 text-[11px] text-slate-500 hidden items-center gap-2"></div>' +
 
               /* Code Editor Area */
               '<textarea id="codeEditor" class="code-editor-area w-full p-4 min-h-[380px] max-h-[600px]" spellcheck="false" placeholder="Viết mã nguồn của bạn ở đây..."></textarea>' +
@@ -402,6 +406,22 @@
     }
 
     function normalizeOutput(s) { return (s||'').replace(/\r\n/g,'\n').replace(/\s+$/,'').trim(); }
+
+    async function loadBestScore(problemId) {
+      var user = ojUser();
+      if (!user) return;
+      try {
+        var res = await ojdb.from('submissions').select('score, max_score, verdict, created_at').eq('username', user.username).eq('problem_id', problemId).order('created_at', {ascending:false}).limit(1);
+        if (res.error || !res.data || res.data.length === 0) return;
+        var s = res.data[0];
+        var bar = document.getElementById('bestScoreBar');
+        if (!bar) return;
+        var icon = s.verdict === 'AC' ? '✓' : '✗';
+        var color = s.verdict === 'AC' ? 'text-emerald-400' : 'text-rose-400';
+        bar.innerHTML = '<span class="' + color + ' font-bold">' + icon + '</span> Điểm cao nhất: <span class="' + color + ' font-semibold">' + s.score + '/' + s.max_score + '</span> <span class="text-slate-600">(' + s.verdict + ')</span>';
+        bar.className = 'px-4 py-1.5 bg-slate-900/40 border-b border-slate-800/60 text-[11px] text-slate-500 flex items-center gap-2';
+      } catch(e) {}
+    }
 
     async function handleSubmit() {
       var id = getParam('id');
