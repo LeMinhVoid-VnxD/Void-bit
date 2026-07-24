@@ -671,7 +671,8 @@
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i data-lucide="send"></i> Nộp bài (Ctrl+Enter)';
-        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    console.log('[BOOT] lucide available:', typeof lucide !== 'undefined');
+    if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
       }
     }
 
@@ -718,7 +719,33 @@
       document.getElementById('solution-result-body').innerHTML = '<p style="color:#8a99ad">Cần chạy OJ Server (oj_server.exe) để dùng tính năng này.</p>';
     };
 
+    console.log('[BOOT] lucide available:', typeof lucide !== 'undefined');
     if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+
+    // Nuclear fallback: render problems list directly
+    function renderProblemsFallback() {
+      var body = document.getElementById('problemsTableBody');
+      var noData = document.getElementById('noProblemsMessage');
+      var debugEl = document.getElementById('debugCount');
+      if (!body) return;
+      if (typeof PROBLEMS_INDEX === 'undefined' || !PROBLEMS_INDEX) {
+        if (debugEl) debugEl.textContent = 'PROBLEMS_INDEX not loaded';
+        return;
+      }
+      var cats = { dp:'Quy hoạch động', binary_search:'Chặt nhị phân', greedy:'Tham lam', graph:'Đồ thị', math:'Toán học', string:'Xử lý xâu', data_structure:'Cấu trúc dữ liệu' };
+      body.innerHTML = '';
+      PROBLEMS_INDEX.forEach(function(p) {
+        var tr = document.createElement('tr');
+        var catName = cats[p.category] || p.category || 'Khác';
+        tr.innerHTML = '<td><span style="color:var(--text-muted)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></span></td><td><a style="cursor:pointer;color:var(--primary);text-decoration:none" onclick="navigateTo(\'problem\',\''+p.id+'\')">'+p.title+'</a></td><td><span style="background:var(--bg-tertiary);padding:2px 8px;border-radius:4px;font-size:12px">'+catName+'</span></td><td><span style="background:var(--bg-tertiary);padding:2px 8px;border-radius:4px;font-size:12px">'+p.difficulty+'</span></td><td>'+ (p.cf_rating||'') +'</td><td>'+(p.subtask_count||0)+' subtasks</td><td>'+ (p.test_count||0) +' tests</td>';
+        body.appendChild(tr);
+      });
+      if (noData) noData.classList.add('hidden');
+      if (debugEl) debugEl.textContent = PROBLEMS_INDEX.length + ' bài tập (renderProblemsFallback)';
+    }
+
+    // Try fallback after OJ handler runs
+    setTimeout(renderProblemsFallback, 100);
   </script>
 </body>
 </html>
