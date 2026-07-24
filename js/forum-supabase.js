@@ -290,6 +290,7 @@ function renderThreadView(container) {
       lucide.createIcons();
     }
   });
+  });
 
   var ch = supabaseClient.channel('forum-msg-' + forum.threadId);
   ch.on('postgres_changes',
