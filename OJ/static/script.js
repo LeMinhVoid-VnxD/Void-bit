@@ -52,6 +52,10 @@ function navigateTo(target, id = '') {
 // API Calls & Data Fetching
 // ==========================================================================
 async function fetchProblems() {
+  if (typeof PROBLEMS_INDEX !== 'undefined' && PROBLEMS_INDEX) {
+    problemsList = PROBLEMS_INDEX;
+    return PROBLEMS_INDEX;
+  }
   try {
     const resp = await fetch(API_BASE + '/api/problems');
     if (!resp.ok) throw new Error('Không thể lấy danh sách bài tập');
@@ -65,6 +69,9 @@ async function fetchProblems() {
 }
 
 async function fetchProblemDetail(id) {
+  if (typeof PROBLEMS_ALL !== 'undefined' && PROBLEMS_ALL && PROBLEMS_ALL[id]) {
+    return PROBLEMS_ALL[id];
+  }
   try {
     const resp = await fetch(API_BASE + `/api/problem/${id}`);
     if (!resp.ok) throw new Error('Không thể tải chi tiết bài tập');
@@ -77,6 +84,10 @@ async function fetchProblemDetail(id) {
 }
 
 async function reloadProblems() {
+  if (typeof PROBLEMS_INDEX !== 'undefined' && PROBLEMS_INDEX) {
+    showToast('Dữ liệu bài tập được nhúng sẵn, không cần đồng bộ.', 'info');
+    return;
+  }
   const btn = document.querySelector('.btn-reload');
   const icon = document.getElementById('reload-icon');
   icon.classList.add('spinning');
@@ -88,7 +99,7 @@ async function reloadProblems() {
     const data = await resp.json();
     
     showToast(`Đồng bộ thành công! Đã quét ${data.count} bài tập.`, 'success');
-    await viewProblemsList(); // Refresh table
+    await viewProblemsList();
   } catch (e) {
     showToast(e.message, 'error');
   } finally {
@@ -894,40 +905,44 @@ function closeSettings() {
 }
 
 function saveSettings() {
+  var el;
   const data = {
-    editorSize: document.getElementById('settings-editor-size').value,
-    tabSize: document.getElementById('settings-tab-size').value,
-    compilerPath: document.getElementById('settings-compiler-path').value.trim(),
-    apiBase: document.getElementById('settings-api-url').value.trim(),
-    aiProvider: document.getElementById('settings-ai-provider').value,
-    aiModel: document.getElementById('settings-ai-model').value,
-    aiKey: document.getElementById('settings-ai-key').value,
-    autoRequest: document.getElementById('settings-auto-request').checked
+    editorSize: (el = document.getElementById('settings-editor-size')) ? el.value : '14px',
+    tabSize: (el = document.getElementById('settings-tab-size')) ? el.value : '4',
+    compilerPath: (el = document.getElementById('settings-compiler-path')) ? el.value.trim() : '',
+    apiBase: (el = document.getElementById('settings-api-url')) ? el.value.trim() : '',
+    aiProvider: (el = document.getElementById('settings-ai-provider')) ? el.value : 'google',
+    aiModel: (el = document.getElementById('settings-ai-model')) ? el.value : '',
+    aiKey: (el = document.getElementById('settings-ai-key')) ? el.value : '',
+    autoRequest: (el = document.getElementById('settings-auto-request')) ? el.checked : true
   };
   localStorage.setItem('oj_local_settings', JSON.stringify(data));
 }
 
 function loadSettingsToUI() {
   const raw = localStorage.getItem('oj_local_settings');
+  var el;
   if (raw) {
     const s = JSON.parse(raw);
-    document.getElementById('settings-editor-size').value = s.editorSize || '14px';
-    document.getElementById('settings-tab-size').value = s.tabSize || '4';
-    document.getElementById('settings-compiler-path').value = s.compilerPath || '';
-    document.getElementById('settings-api-url').value = s.apiBase || '';
-    if (s.aiProvider) document.getElementById('settings-ai-provider').value = s.aiProvider;
+    if (el = document.getElementById('settings-editor-size')) el.value = s.editorSize || '14px';
+    if (el = document.getElementById('settings-tab-size')) el.value = s.tabSize || '4';
+    if (el = document.getElementById('settings-compiler-path')) el.value = s.compilerPath || '';
+    if (el = document.getElementById('settings-api-url')) el.value = s.apiBase || '';
+    if (s.aiProvider && (el = document.getElementById('settings-ai-provider'))) el.value = s.aiProvider;
     populateSettingsAIModels(s.aiModel);
-    if (s.aiKey) document.getElementById('settings-ai-key').value = s.aiKey;
-    document.getElementById('settings-auto-request').checked = s.autoRequest !== false;
+    if (s.aiKey && (el = document.getElementById('settings-ai-key'))) el.value = s.aiKey;
+    if (el = document.getElementById('settings-auto-request')) el.checked = s.autoRequest !== false;
   } else {
     populateSettingsAIModels();
-    document.getElementById('settings-auto-request').checked = true;
+    if (el = document.getElementById('settings-auto-request')) el.checked = true;
   }
 }
 
 function populateSettingsAIModels(selectedModel) {
-  const provider = document.getElementById('settings-ai-provider').value;
+  const providerEl = document.getElementById('settings-ai-provider');
   const sel = document.getElementById('settings-ai-model');
+  if (!providerEl || !sel) return;
+  const provider = providerEl.value;
   sel.innerHTML = '';
   const models = GEN_MODELS[provider] || [];
   models.forEach(function(m) {
@@ -940,14 +955,17 @@ function populateSettingsAIModels(selectedModel) {
 }
 
 function applySettings() {
-  const size = document.getElementById('settings-editor-size').value;
-  const tab = document.getElementById('settings-tab-size').value;
-  const compilerPath = document.getElementById('settings-compiler-path').value.trim();
-  const apiUrl = document.getElementById('settings-api-url').value.trim();
+  var el;
+  const size = (el = document.getElementById('settings-editor-size')) ? el.value : '14px';
+  const tab = (el = document.getElementById('settings-tab-size')) ? el.value : '4';
+  const compilerPath = (el = document.getElementById('settings-compiler-path')) ? el.value.trim() : '';
+  const apiUrl = (el = document.getElementById('settings-api-url')) ? el.value.trim() : '';
   
   const editor = document.getElementById('codeEditor');
-  editor.style.fontSize = size;
-  editor.style.tabSize = tab;
+  if (editor) {
+    editor.style.fontSize = size;
+    editor.style.tabSize = tab;
+  }
   
   const apiVal = apiUrl || '';
   localStorage.setItem('api_base', apiVal);

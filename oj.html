@@ -674,90 +674,11 @@
       }
     }
 
-    // ======================================================================
-    // Override — run immediately after OJ script loads (before DOMContentLoaded)
-    // ======================================================================
-
-    // Override viewProblemsList to use embedded index (bypasses fetch CORS on file://)
-    var viewProblemsList = async function() {
-      document.getElementById('view-problem-detail').classList.add('hidden');
-      document.getElementById('view-problems').classList.remove('hidden');
-      document.getElementById('nav-problems').classList.add('active');
-      var body = document.getElementById('problemsTableBody');
-      body.innerHTML = '<tr class="skeleton-row"><td colspan="6"><div class="skeleton"></div></td></tr>';
-      // Use embedded data
-      if (typeof PROBLEMS_INDEX !== 'undefined' && PROBLEMS_INDEX) {
-        try { problemsList = PROBLEMS_INDEX; } catch(e) {}
-      }
-      if (typeof renderProblemsTable === 'function') renderProblemsTable();
-    };
-
-    window.fetchProblemDetail = async function(id) {
-      if (typeof PROBLEMS_ALL !== 'undefined' && PROBLEMS_ALL && PROBLEMS_ALL[id]) {
-        return PROBLEMS_ALL[id];
-      }
-      try {
-        var resp = await fetch('OJ/problems/' + id + '.json');
-        if (!resp.ok) throw new Error('Không thể tải bài tập');
-        return await resp.json();
-      } catch (e) {
-        console.error('fetchProblemDetail error:', e);
-        return null;
-      }
-    };
-    // Keep a working fetchProblems for the 10s refresh interval
-    window.fetchProblems = async function() {
-      if (typeof PROBLEMS_INDEX !== 'undefined' && PROBLEMS_INDEX) {
-        try { problemsList = PROBLEMS_INDEX; } catch(e) {}
-        return PROBLEMS_INDEX;
-      }
-      return [];
-    };
-
-    // Completely replace settings functions (originals reference removed elements)
-    window.loadSettingsToUI = function() {
-      var raw = localStorage.getItem('oj_local_settings');
-      try {
-        var s = raw ? JSON.parse(raw) : {};
-        var el;
-        el = document.getElementById('settings-editor-size'); if (el) el.value = s.editorSize || '14px';
-        el = document.getElementById('settings-tab-size'); if (el) el.value = s.tabSize || '4';
-        el = document.getElementById('settings-ai-provider'); if (el && s.aiProvider) el.value = s.aiProvider;
-        if (typeof populateSettingsAIModels === 'function') populateSettingsAIModels(s.aiModel);
-        el = document.getElementById('settings-ai-key'); if (el && s.aiKey) el.value = s.aiKey;
-        el = document.getElementById('settings-auto-request');
-        if (el) el.checked = s.autoRequest !== false;
-      } catch(e) { console.error('loadSettingsToUI error:', e); }
-    };
-
-    window.saveSettings = function() {
-      try {
-        var s = {};
-        var el;
-        el = document.getElementById('settings-editor-size'); if (el) s.editorSize = el.value;
-        el = document.getElementById('settings-tab-size'); if (el) s.tabSize = el.value;
-        el = document.getElementById('settings-ai-provider'); if (el) s.aiProvider = el.value;
-        el = document.getElementById('settings-ai-model'); if (el) s.aiModel = el.value;
-        el = document.getElementById('settings-ai-key'); if (el) s.aiKey = el.value;
-        el = document.getElementById('settings-auto-request'); if (el) s.autoRequest = el.checked;
-        localStorage.setItem('oj_local_settings', JSON.stringify(s));
-      } catch(e) { console.error('saveSettings error:', e); }
-    };
-
-    window.applySettings = function() {
-      var size = document.getElementById('settings-editor-size');
-      var tab = document.getElementById('settings-tab-size');
-      var editor = document.getElementById('codeEditor');
-      if (size && editor) editor.style.fontSize = size.value;
-      if (tab && editor) editor.style.tabSize = tab.value;
-      if (typeof window.saveSettings === 'function') window.saveSettings();
-    };
-
-    // Wandbox-based submission
+    // Wandbox-based submission (replace backend API calls)
     window.handleCodeSubmit = function() { wandboxHandleSubmit(''); };
     window.handleContestCodeSubmit = function() { wandboxHandleSubmit('contest'); };
 
-    // AI features (no backend)
+    // AI features (need backend — stub for local use)
     window.handleGenerateProblem = function() {
       document.getElementById('gen-result-area').classList.remove('hidden');
       document.getElementById('gen-result-area').style.display = 'block';
@@ -783,8 +704,6 @@
       document.getElementById('solution-result-title').textContent = 'Code giải';
       document.getElementById('solution-result-body').innerHTML = '<p style="color:#8a99ad">Cần chạy OJ Server (oj_server.exe) để dùng tính năng này.</p>';
     };
-
-    // DOMContentLoaded — no extra setup needed (Wandbox is configuration-free)
 
     if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
   </script>
