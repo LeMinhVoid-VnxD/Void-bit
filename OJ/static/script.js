@@ -152,7 +152,7 @@ function renderProblemsTable() {
   const debugEl = document.getElementById('debugCount');
   body.innerHTML = '';
   console.log('[renderProblemsTable] problemsList:', problemsList ? problemsList.length : 'null/undefined');
-  if (debugEl) debugEl.textContent = problemsList ? problemsList.length + ' bài tập' : 'đang tải...';
+  console.log('[renderProblemsTable] currentCategory:', currentCategory, 'searchQuery:', JSON.stringify(searchQuery));
   
   // Filter problems
   const filtered = problemsList.filter(p => {
@@ -162,6 +162,7 @@ function renderProblemsTable() {
     return matchCat && matchSearch;
   });
   
+  if (debugEl) debugEl.textContent = problemsList.length + ' bài tập · lọc: ' + filtered.length;
   if (filtered.length === 0) {
     noData.classList.remove('hidden');
     return;
