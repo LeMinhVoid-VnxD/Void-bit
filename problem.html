@@ -7,36 +7,104 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="OJ/static/style.css">
   <style>
-    body { padding-top: 4rem; background: var(--bg-primary); }
+    body { padding-top: 4rem; background: #0b1120; color: #f8fafc; font-family: 'Inter', sans-serif; min-height: 100vh; }
     #toastContainer { position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-    .oj-container { max-width: 1400px; margin: 0 auto; padding: 20px 24px; }
-    .oj-layout { display: grid; grid-template-columns: 1fr 500px; gap: 24px; align-items: start; }
-    @media (max-width: 1024px) { .oj-layout { grid-template-columns: 1fr; } }
-    .loader { text-align: center; padding: 80px 20px; color: var(--text-muted); }
-    .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-    .prob-section { margin-bottom: 24px; }
-    .prob-section h3 { font-size: 1.1em; color: var(--primary-hover); margin-bottom: 8px; border-left: 3px solid var(--primary); padding-left: 8px; }
-    .prob-section > div { color: var(--text-primary); font-size: 0.95em; line-height: 1.7; padding-left: 4px; }
+    
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      border-radius: 12px;
+    }
+    
+    .oj-container { max-width: 1536px; margin: 0 auto; padding: 20px; }
+    .oj-layout { display: grid; grid-template-columns: 1fr 560px; gap: 20px; align-items: start; }
+    @media (max-width: 1120px) { .oj-layout { grid-template-columns: 1fr; } }
+    
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.4);
+    }
+    
+    .prob-section-content {
+      color: #cbd5e1;
+      font-size: 0.938rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .code-editor-area {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      background: #080d1a;
+      color: #f1f5f9;
+      caret-color: #38bdf8;
+      border: none;
+      outline: none;
+      resize: vertical;
+      tab-size: 4;
+    }
+
+    .testcase-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'Fira Code', monospace;
+      transition: all 0.2s;
+    }
+    .testcase-pill.AC { background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; }
+    .testcase-pill.WA { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; }
+    .testcase-pill.TLE { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; }
+    .testcase-pill.RE { background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.4); color: #fb923c; }
+    .testcase-pill.CE { background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; }
+    .testcase-pill.RUNNING { background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; animation: pulse 1s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
   </style>
 </head>
 <body>
-  <nav class="glass fixed top-0 left-0 right-0 z-50 h-16" style="background:rgba(15,23,42,.85);">
+  <!-- Navigation Bar -->
+  <nav class="glass fixed top-0 left-0 right-0 z-50 h-16 border-b border-slate-800" style="background:rgba(11, 17, 32, 0.9);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-      <a href="index.html" class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg accent-bg flex items-center justify-center">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-9 h-9 rounded-xl accent-bg flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </div>
-        <span class="text-lg font-bold" style="color:var(--text-primary)">Void-bit</span>
+        <span class="text-xl font-black tracking-tight text-white">Void-bit</span>
       </a>
-      <div class="flex items-center gap-3">
-        <a href="oj-new.html" class="nav-link text-sm">Danh sách</a>
-        <a href="submissions.html" class="nav-link text-sm">Lịch sử</a>
-        <a href="leaderboard.html" class="nav-link text-sm">BXH</a>
-        <a href="profile.html" class="nav-link text-sm">Profile</a>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="oj-new.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center gap-1.5">
+          <i data-lucide="list" class="w-4 h-4 text-cyan-400"></i><span class="hidden sm:inline">Danh sách</span>
+        </a>
+        <a href="submissions.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center gap-1.5">
+          <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i><span class="hidden sm:inline">Lịch sử</span>
+        </a>
+        <a href="leaderboard.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center gap-1.5">
+          <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i><span class="hidden sm:inline">BXH</span>
+        </a>
+        <a href="profile.html" class="px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all flex items-center gap-1.5">
+          <i data-lucide="user" class="w-4 h-4 text-blue-400"></i><span class="hidden sm:inline">Profile</span>
+        </a>
       </div>
     </div>
   </nav>
@@ -44,10 +112,29 @@
   <div id="toastContainer"></div>
 
   <main class="oj-container">
-    <div class="top-bar">
-      <a href="oj-new.html" class="btn-back"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> Danh sách bài</a>
+    <!-- Breadcrumb & Top bar -->
+    <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+      <div class="flex items-center gap-2 text-sm text-slate-400 font-medium">
+        <a href="oj-new.html" class="hover:text-cyan-400 transition-colors flex items-center gap-1">
+          <i data-lucide="cpu" class="w-4 h-4"></i> OJ
+        </a>
+        <span>/</span>
+        <a href="oj-new.html" class="hover:text-cyan-400 transition-colors">Danh sách bài tập</a>
+        <span>/</span>
+        <span class="text-slate-200 font-semibold" id="breadcrumbTitle">Bài tập</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="oj-new.html" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all flex items-center gap-1.5">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Quay lại
+        </a>
+      </div>
     </div>
-    <div id="problemContent" class="loader">Đang tải dữ liệu...</div>
+
+    <!-- Main Grid -->
+    <div id="problemContent" class="text-center py-20 text-slate-500">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-500 border-t-transparent mb-3"></div>
+      <p>Đang tải dữ liệu bài tập...</p>
+    </div>
   </main>
 
   <script src="OJ/problems/problems-data.js"></script>
@@ -56,7 +143,13 @@
   <script>
     var CAT_NAMES = { dp:'Quy hoạch động', binary_search:'Chặt nhị phân', greedy:'Tham lam', graph:'Đồ thị', math:'Toán học', string:'Xử lý xâu', data_structure:'Cấu trúc dữ liệu', other:'Khác' };
 
-    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    var TEMPLATES = {
+      cpp: '#include <iostream>\nusing namespace std;\n\nint main() {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    \n    // Viết mã nguồn của bạn ở đây\n    \n    return 0;\n}',
+      python: 'import sys\n\ndef main():\n    # Viết mã nguồn của bạn ở đây\n    pass\n\nif __name__ == "__main__":\n    main()',
+      java: 'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // Viết mã nguồn của bạn ở đây\n        \n    }\n}'
+    };
+
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     function getParam(name) {
       var m = window.location.search.match(new RegExp('[?&]' + name + '=([^&]*)'));
@@ -66,83 +159,235 @@
     document.addEventListener('DOMContentLoaded', function() {
       var id = getParam('id');
       if (!id || typeof PROBLEMS_ALL === 'undefined' || !PROBLEMS_ALL[id]) {
-        document.getElementById('problemContent').innerHTML = '<div class="loader"><p style="color:#ef4444;font-size:1.1rem">Không tìm thấy bài tập</p><a href="oj-new.html" style="display:inline-block;margin-top:16px;padding:10px 24px;border-radius:8px;background:var(--primary);color:#fff;text-decoration:none">Quay lại danh sách</a></div>';
+        document.getElementById('problemContent').innerHTML = 
+          '<div class="glass-card p-12 text-center max-w-md mx-auto my-12">' +
+            '<div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4 text-red-400">' +
+              '<i data-lucide="alert-circle" class="w-8 h-8"></i>' +
+            '</div>' +
+            '<h2 class="text-xl font-bold text-white mb-2">Không tìm thấy bài tập</h2>' +
+            '<p class="text-sm text-slate-400 mb-6">Mã bài tập không tồn tại hoặc đã bị gỡ khỏi hệ thống.</p>' +
+            '<a href="oj-new.html" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all">Quay lại danh sách</a>' +
+          '</div>';
+        try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
         return;
       }
       renderProblem(PROBLEMS_ALL[id]);
     });
 
     function renderProblem(p) {
-      document.title = p.title + ' — Void-bit';
+      document.title = p.title + ' — Void-bit OJ';
+      var breadcrumb = document.getElementById('breadcrumbTitle');
+      if (breadcrumb) breadcrumb.textContent = p.title;
+
+      var diffBg = p.difficulty === 'easy' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' :
+                   p.difficulty === 'medium' ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' :
+                   'bg-rose-500/15 text-rose-400 border-rose-500/30';
+      var diffLabel = p.difficulty === 'easy' ? 'Dễ' : p.difficulty === 'medium' ? 'Trung bình' : 'Khó';
+
       document.getElementById('problemContent').innerHTML =
         '<div class="oj-layout">' +
-          '<article class="card statement-card" style="padding:24px">' +
-            '<h1 class="prob-title" style="margin-bottom:12px">' + esc(p.title) + '</h1>' +
-            '<div class="meta-pills" style="margin-bottom:20px">' +
-              '<span class="meta-pill">' + esc(p.difficulty) + '</span>' +
-              '<span class="meta-pill">' + esc(CAT_NAMES[p.category] || p.category || 'Khác') + '</span>' +
-              '<span class="meta-pill">' + (p.time_limit||1) + 's</span>' +
-              '<span class="meta-pill">' + (p.memory_limit||256) + 'MB</span>' +
-              (p.cf_rating ? '<span class="meta-pill" style="background:rgba(251,191,36,0.15);color:#fbbf24">Rating: ' + p.cf_rating + '</span>' : '') +
+          /* Left Side: Statement */
+          '<article class="glass-card p-6 sm:p-8 space-y-6">' +
+            '<div>' +
+              '<h1 class="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight">' + esc(p.title) + '</h1>' +
+              '<div class="flex flex-wrap items-center gap-2 text-xs font-semibold">' +
+                '<span class="px-2.5 py-1 rounded-md border ' + diffBg + '">' + diffLabel + '</span>' +
+                '<span class="px-2.5 py-1 rounded-md border border-slate-700 bg-slate-800/80 text-cyan-400 flex items-center gap-1"><i data-lucide="tag" class="w-3.5 h-3.5"></i>' + esc(CAT_NAMES[p.category] || p.category || 'Khác') + '</span>' +
+                '<span class="px-2.5 py-1 rounded-md border border-slate-700 bg-slate-800/80 text-slate-300 flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>' + (p.time_limit||1) + 's</span>' +
+                '<span class="px-2.5 py-1 rounded-md border border-slate-700 bg-slate-800/80 text-slate-300 flex items-center gap-1"><i data-lucide="hard-drive" class="w-3.5 h-3.5 text-slate-400"></i>' + (p.memory_limit||256) + 'MB</span>' +
+                (p.cf_rating ? '<span class="px-2.5 py-1 rounded-md border border-amber-500/30 bg-amber-500/15 text-amber-400 flex items-center gap-1"><i data-lucide="award" class="w-3.5 h-3.5"></i>Rating: ' + p.cf_rating + '</span>' : '') +
+              '</div>' +
             '</div>' +
-            buildSection('Mô tả', p.description) +
-            buildSection('Định dạng đầu vào', p.input_format) +
-            buildSection('Định dạng đầu ra', p.output_format) +
-            buildSection('Ràng buộc', p.constraints) +
+
+            buildSection('file-text', 'Mô tả bài toán', p.description) +
+            buildSection('arrow-down-right', 'Định dạng đầu vào', p.input_format) +
+            buildSection('arrow-up-right', 'Định dạng đầu ra', p.output_format) +
+            buildSection('shield-alert', 'Ràng buộc', p.constraints) +
             buildSubtasks(p.subtasks) +
             buildSamples(p.samples) +
           '</article>' +
-          '<aside>' +
-            '<div class="card" style="padding:0;overflow:hidden">' +
-              '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(30,41,59,0.5);border-bottom:1px solid var(--border-color)">' +
-                '<select id="langSelect" style="padding:6px 12px;border-radius:6px;background:rgba(15,23,42,0.8);border:1px solid var(--border-color);color:var(--text-primary);font-size:0.8rem;outline:none"><option value="cpp">C++</option><option value="python">Python</option><option value="java">Java</option></select>' +
-                '<button id="btnSubmit" onclick="handleSubmit()" style="padding:7px 18px;border-radius:6px;border:none;background:linear-gradient(135deg,#00f0ff,#3b82f6);color:#fff;font-size:0.8rem;font-weight:600;cursor:pointer">Nộp bài</button>' +
-              '</div>' +
-              '<textarea id="codeEditor" class="code-editor" spellcheck="false" placeholder="Viết mã nguồn..." style="width:100%;min-height:400px;padding:16px;background:var(--bg-primary);border:none;color:var(--text-primary);font-family:\'Fira Code\',monospace;font-size:0.85rem;resize:vertical;outline:none;tab-size:4"></textarea>' +
-              '<div id="resultBox" style="display:none;padding:16px;border-top:1px solid var(--border-color)">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
-                  '<span id="verdictText" style="font-weight:700;font-size:1rem">Judging...</span>' +
-                  '<span id="scoreText" style="font-size:0.9rem;color:var(--text-muted)">- / -</span>' +
+
+          /* Right Side: Editor & Submit */
+          '<aside class="space-y-4 sticky top-20">' +
+            '<div class="glass-card overflow-hidden shadow-2xl border-slate-800">' +
+              /* Toolbar */
+              '<div class="px-4 py-3 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between flex-wrap gap-2">' +
+                '<div class="flex items-center gap-2">' +
+                  '<i data-lucide="code-2" class="w-4 h-4 text-cyan-400"></i>' +
+                  '<select id="langSelect" onchange="changeLanguage(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-lg px-2.5 py-1.5 outline-none focus:border-cyan-500 transition-colors cursor-pointer">' +
+                    '<option value="cpp">C++ (GCC 13)</option>' +
+                    '<option value="python">Python 3.10</option>' +
+                    '<option value="java">Java 18</option>' +
+                  '</select>' +
                 '</div>' +
-                '<div style="height:6px;border-radius:3px;background:var(--border-color);overflow:hidden;margin-bottom:12px"><div id="scoreBar" style="height:100%;width:0%;border-radius:3px;background:linear-gradient(90deg,#00f0ff,#3b82f6);transition:width .3s"></div></div>' +
-                '<div id="verdictDetail" style="font-size:0.8rem;color:var(--text-muted);max-height:150px;overflow-y:auto"></div>' +
+                '<div class="flex items-center gap-2">' +
+                  '<button onclick="resetTemplate()" title="Khôi phục code mẫu" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors text-xs font-medium flex items-center gap-1 border border-slate-700">' +
+                    '<i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>' +
+                  '</button>' +
+                  '<button id="btnSubmit" onclick="handleSubmit()" class="px-4 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs shadow-md shadow-cyan-500/20 transition-all flex items-center gap-1.5 cursor-pointer">' +
+                    '<i data-lucide="send" class="w-3.5 h-3.5"></i> Nộp bài' +
+                  '</button>' +
+                '</div>' +
+              '</div>' +
+
+              /* Code Editor Area */
+              '<textarea id="codeEditor" class="code-editor-area w-full p-4 min-h-[380px] max-h-[600px]" spellcheck="false" placeholder="Viết mã nguồn của bạn ở đây..."></textarea>' +
+
+              /* Shortcuts bar */
+              '<div class="px-4 py-1.5 bg-slate-900/60 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">' +
+                '<span>Mẹo: Nhấn <kbd class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px]">Ctrl + Enter</kbd> để nộp bài nhanh</span>' +
+                '<span id="charCount">0 kí tự</span>' +
+              '</div>' +
+
+              /* Result / Judging Box */
+              '<div id="resultBox" class="hidden p-4 bg-slate-900/90 border-t border-slate-800 space-y-3">' +
+                '<div class="flex items-center justify-between">' +
+                  '<div class="flex items-center gap-2">' +
+                    '<span id="verdictIcon"></span>' +
+                    '<span id="verdictText" class="font-bold text-sm text-slate-200">Đang chấm...</span>' +
+                  '</div>' +
+                  '<span id="scoreText" class="text-xs font-semibold text-slate-400 font-mono">- / -</span>' +
+                '</div>' +
+                '<div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">' +
+                  '<div id="scoreBar" class="h-full bg-cyan-500 w-0 transition-all duration-300"></div>' +
+                '</div>' +
+                '<div id="testcasePills" class="flex flex-wrap gap-1.5 pt-1"></div>' +
+                '<div id="verdictDetail" class="text-xs font-mono text-slate-400 max-h-40 overflow-y-auto space-y-1"></div>' +
               '</div>' +
             '</div>' +
-            '<div style="margin-top:16px">' +
-              '<a href="submissions.html?problem=' + encodeURIComponent(p.id) + '" style="display:block;text-align:center;padding:10px;border-radius:8px;border:1px solid var(--border-color);color:var(--text-muted);font-size:0.85rem;text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor=\'var(--primary)\';this.style.color=\'var(--primary)\'" onmouseout="this.style.borderColor=\'var(--border-color)\';this.style.color=\'var(--text-muted)\'">Xem lịch sử nộp bài</a>' +
+
+            /* History Button */
+            '<div>' +
+              '<a href="submissions.html?problem=' + encodeURIComponent(p.id) + '" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800/80 text-slate-400 hover:text-cyan-400 text-xs font-semibold transition-all group">' +
+                '<i data-lucide="history" class="w-4 h-4 text-slate-500 group-hover:text-cyan-400"></i> Xem lịch sử nộp bài cá nhân' +
+              '</a>' +
             '</div>' +
           '</aside>' +
         '</div>';
 
+      /* Init Code Editor Events */
       var ce = document.getElementById('codeEditor');
-      if (ce) ce.addEventListener('keydown', function(e) {
-        if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); handleSubmit(); }
-      });
-      var si = document.getElementById('searchInput');
+      if (ce) {
+        ce.value = TEMPLATES['cpp'];
+        updateCharCount(ce.value);
+        ce.addEventListener('input', function() { updateCharCount(this.value); });
+        ce.addEventListener('keydown', function(e) {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+            this.selectionStart = this.selectionEnd = start + 4;
+            updateCharCount(this.value);
+          }
+          if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            handleSubmit();
+          }
+        });
+      }
+
+      try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
     }
 
-    function buildSection(title, content) {
+    function updateCharCount(val) {
+      var el = document.getElementById('charCount');
+      if (el) el.textContent = (val || '').length + ' kí tự';
+    }
+
+    function changeLanguage(lang) {
+      var ce = document.getElementById('codeEditor');
+      if (!ce) return;
+      if (!ce.value.trim() || ce.value === TEMPLATES['cpp'] || ce.value === TEMPLATES['python'] || ce.value === TEMPLATES['java']) {
+        ce.value = TEMPLATES[lang] || '';
+        updateCharCount(ce.value);
+      }
+    }
+
+    function resetTemplate() {
+      var langSel = document.getElementById('langSelect');
+      var ce = document.getElementById('codeEditor');
+      if (!langSel || !ce) return;
+      var lang = langSel.value || 'cpp';
+      if (confirm('Khôi phục mã nguồn về template ban đầu?')) {
+        ce.value = TEMPLATES[lang] || '';
+        updateCharCount(ce.value);
+      }
+    }
+
+    function buildSection(icon, title, content) {
       if (!content || !content.trim()) return '';
-      return '<div class="prob-section"><h3>' + esc(title) + '</h3><div>' + content.replace(/\n/g,'<br>') + '</div></div>';
+      return '<div class="space-y-2">' +
+               '<div class="section-title"><i data-lucide="' + icon + '" class="w-4 h-4"></i> ' + esc(title) + '</div>' +
+               '<div class="prob-section-content bg-slate-900/50 p-4 rounded-xl border border-slate-800/80">' + esc(content) + '</div>' +
+             '</div>';
     }
 
     function buildSubtasks(subtasks) {
       if (!subtasks || !subtasks.length) return '';
-      var h = '<div class="prob-section"><h3>Các subtask</h3><div>';
+      var h = '<div class="space-y-2">' +
+                '<div class="section-title"><i data-lucide="layers" class="w-4 h-4"></i> Các Subtask</div>' +
+                '<div class="grid gap-2 sm:grid-cols-2">';
       subtasks.forEach(function(s) {
-        h += '<div class="subtask-item"><div class="subtask-info"><span class="subtask-name">Subtask #' + s.id + '</span><span class="subtask-constraints">' + esc(s.constraints||'') + '</span></div><span class="subtask-points">' + s.points + ' điểm</span></div>';
+        h += '<div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-slate-800">' +
+               '<div class="space-y-0.5">' +
+                 '<div class="text-xs font-bold text-slate-200">Subtask #' + s.id + '</div>' +
+                 '<div class="text-[11px] text-slate-400">' + esc(s.constraints||'') + '</div>' +
+               '</div>' +
+               '<span class="px-2 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold font-mono">' + s.points + ' điểm</span>' +
+             '</div>';
       });
       return h + '</div></div>';
     }
 
     function buildSamples(samples) {
-      if (!samples || !samples.length) return '<div class="prob-section"><h3>Ví dụ</h3><p class="text-secondary">Không có ví dụ mẫu.</p></div>';
-      var h = '<div class="prob-section"><h3>Ví dụ</h3><div>';
+      if (!samples || !samples.length) return '';
+      var h = '<div class="space-y-3">' +
+                '<div class="section-title"><i data-lucide="file-code-2" class="w-4 h-4"></i> Ví dụ mẫu</div>';
       samples.forEach(function(s, i) {
-        var eh = s.explanation ? '<div class="sample-explanation"><strong>Giải thích:</strong> ' + esc(s.explanation) + '</div>' : '';
-        h += '<div class="sample-block"><div class="sample-header"><span>Ví dụ #' + (i+1) + '</span></div><pre class="sample-body">' + esc(s.input) + '</pre><div class="sample-header" style="border-top:1px solid var(--border-color)"><span>Kết quả mẫu</span></div><pre class="sample-body">' + esc(s.output) + '</pre>' + eh + '</div>';
+        var sampleId = 'sample_' + i;
+        var eh = s.explanation ? '<div class="text-xs text-slate-400 bg-slate-900/40 p-3 border-t border-slate-800"><span class="font-semibold text-cyan-400">Giải thích:</span> ' + esc(s.explanation) + '</div>' : '';
+        h += '<div class="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden space-y-0">' +
+               '<div class="px-4 py-2 bg-slate-800/50 border-b border-slate-800 flex items-center justify-between text-xs font-bold text-slate-300">' +
+                 '<span>Ví dụ #' + (i+1) + '</span>' +
+               '</div>' +
+               '<div class="grid sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-800">' +
+                 /* Input Block */
+                 '<div>' +
+                   '<div class="px-3 py-1.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between text-[11px] font-semibold text-slate-400">' +
+                     '<span>Đầu vào (Input)</span>' +
+                     '<button onclick="copyText(\'in_' + sampleId + '\')" class="hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px]">' +
+                       '<i data-lucide="copy" class="w-3 h-3"></i> Copy' +
+                     '</button>' +
+                   '</div>' +
+                   '<pre id="in_' + sampleId + '" class="p-3 font-mono text-xs text-slate-200 overflow-x-auto m-0 leading-relaxed">' + esc(s.input) + '</pre>' +
+                 '</div>' +
+                 /* Output Block */
+                 '<div>' +
+                   '<div class="px-3 py-1.5 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between text-[11px] font-semibold text-slate-400">' +
+                     '<span>Đầu ra (Output)</span>' +
+                     '<button onclick="copyText(\'out_' + sampleId + '\')" class="hover:text-cyan-400 transition-colors flex items-center gap-1 text-[10px]">' +
+                       '<i data-lucide="copy" class="w-3 h-3"></i> Copy' +
+                     '</button>' +
+                   '</div>' +
+                   '<pre id="out_' + sampleId + '" class="p-3 font-mono text-xs text-slate-200 overflow-x-auto m-0 leading-relaxed">' + esc(s.output) + '</pre>' +
+                 '</div>' +
+               '</div>' +
+               eh +
+             '</div>';
       });
-      return h + '</div></div>';
+      return h + '</div>';
+    }
+
+    function copyText(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var txt = el.textContent || '';
+      navigator.clipboard.writeText(txt).then(function() {
+        ojToast('Đã sao chép vào bộ nhớ tạm', 'success');
+      }).catch(function() {
+        ojToast('Không thể sao chép', 'error');
+      });
     }
 
     var WANDBOX_COMPILERS = { cpp:'gcc-13.1.0', python:'python3-10.0', java:'openjdk-java-18.0.1' };
@@ -157,15 +402,6 @@
     }
 
     function normalizeOutput(s) { return (s||'').replace(/\r\n/g,'\n').replace(/\s+$/,'').trim(); }
-
-    function getVerdictStyle(v) {
-      if (v === 'AC') return {color:'#22c55e', text:'AC', label:'Accepted'};
-      if (v === 'WA') return {color:'#ef4444', text:'WA', label:'Wrong Answer'};
-      if (v === 'TLE') return {color:'#f59e0b', text:'TLE', label:'Time Limit Exceeded'};
-      if (v === 'RE') return {color:'#f97316', text:'RE', label:'Runtime Error'};
-      if (v === 'CE') return {color:'#a855f7', text:'CE', label:'Compilation Error'};
-      return {color:'#64748b', text:'ATT', label:'Attempted'};
-    }
 
     async function handleSubmit() {
       var id = getParam('id');
@@ -184,23 +420,37 @@
       if (!compiler) { ojToast('Ngôn ngữ không được hỗ trợ', 'error'); return; }
 
       btn.disabled = true;
-      btn.innerHTML = 'Đang chấm...';
+      btn.innerHTML = '<span class="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent mr-1"></span> Đang chấm...';
+
       var box = document.getElementById('resultBox');
       var vEl = document.getElementById('verdictText');
       var sEl = document.getElementById('scoreText');
       var pEl = document.getElementById('scoreBar');
+      var pillsEl = document.getElementById('testcasePills');
       var dEl = document.getElementById('verdictDetail');
-      box.style.display = 'block';
-      vEl.textContent = 'Judging...'; vEl.style.color = '#64748b';
-      sEl.textContent = '- / -'; pEl.style.width = '0%';
+
+      box.classList.remove('hidden');
+      vEl.textContent = 'Đang khởi tạo...'; vEl.className = 'font-bold text-sm text-cyan-400';
+      sEl.textContent = '0 / ' + (prob.test_cases ? prob.test_cases.length : 0);
+      pEl.style.width = '0%';
+      pillsEl.innerHTML = '';
       dEl.innerHTML = '';
 
       try {
         var tcs = prob.test_cases || [];
-        if (tcs.length === 0) { ojToast('Không có test case', 'error'); return; }
+        if (tcs.length === 0) { ojToast('Không có test case', 'error'); btn.disabled = false; btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Nộp bài'; return; }
+
         var results = [];
         for (var i = 0; i < tcs.length; i++) {
           vEl.textContent = 'Đang chấm test #' + (i+1) + '/' + tcs.length + '...';
+          
+          /* Render running pill */
+          var tempPill = document.createElement('span');
+          tempPill.id = 'pill_' + i;
+          tempPill.className = 'testcase-pill RUNNING';
+          tempPill.textContent = '#' + (i+1);
+          pillsEl.appendChild(tempPill);
+
           var r = await wandboxSubmit(code.value, compiler, tcs[i].input);
           var v = 'WA';
           if (r.status === '0') {
@@ -210,26 +460,39 @@
           } else {
             v = (r.signal && parseInt(r.signal) !== 0) ? 'RE' : 'CE';
           }
+
           results.push({i:i, v:v, stderr:r.compiler_error||r.program_error||'', stdout:r.program_output||''});
+
+          /* Update pill */
+          var currentPill = document.getElementById('pill_' + i);
+          if (currentPill) {
+            currentPill.className = 'testcase-pill ' + v;
+            currentPill.textContent = '#' + (i+1) + ' ' + v;
+          }
+
           if (v === 'CE' || v === 'RE') {
-            dEl.innerHTML += '<div style="margin-top:4px;padding:8px;background:rgba(239,68,68,0.1);border-radius:4px;font-size:0.75rem;color:#f87171;white-space:pre-wrap;max-height:200px;overflow-y:auto">' + esc(results[results.length-1].stderr) + '</div>';
+            dEl.innerHTML += '<div class="p-3 bg-rose-500/10 border border-rose-500/30 rounded-lg text-rose-400 text-xs font-mono overflow-x-auto mt-2"><div class="font-bold mb-1">Lỗi thông điệp (' + v + '):</div>' + esc(results[results.length-1].stderr) + '</div>';
             break;
           }
-          await new Promise(function(r) { setTimeout(r, 200); });
+          await new Promise(function(r) { setTimeout(r, 150); });
         }
 
         var ac = results.filter(function(r){return r.v==='AC';}).length;
         var total = tcs.length;
-        var vs = getVerdictStyle(ac === total ? 'AC' : (ac > 0 ? 'WA' : results.some(function(r){return r.v==='CE'})?'CE':results.some(function(r){return r.v==='RE'})?'RE':results.some(function(r){return r.v==='TLE'})?'TLE':'WA'));
-        vEl.textContent = vs.text + ' — ' + vs.label;
-        vEl.style.color = vs.color;
+        var overallVerdict = ac === total ? 'AC' : (ac > 0 ? 'WA' : results.some(function(r){return r.v==='CE'})?'CE':results.some(function(r){return r.v==='RE'})?'RE':results.some(function(r){return r.v==='TLE'})?'TLE':'WA');
+
+        if (overallVerdict === 'AC') {
+          vEl.textContent = 'Accepted! (AC)';
+          vEl.className = 'font-bold text-sm text-emerald-400';
+          pEl.className = 'h-full bg-emerald-500 transition-all duration-300';
+        } else {
+          vEl.textContent = 'Chưa hoàn thành (' + overallVerdict + ')';
+          vEl.className = 'font-bold text-sm text-rose-400';
+          pEl.className = 'h-full bg-rose-500 transition-all duration-300';
+        }
+
         sEl.textContent = ac + ' / ' + total + ' testcase';
         pEl.style.width = Math.round(ac/total*100) + '%';
-        pEl.style.background = ac === total ? 'linear-gradient(90deg,#22c55e,#16a34a)' : 'linear-gradient(90deg,#f59e0b,#ef4444)';
-
-        var verdict = ac === total ? 'AC' : 'WA';
-        var score = ac;
-        var maxScore = total;
 
         try {
           var subRes = await ojdb.from('submissions').insert({
@@ -240,25 +503,25 @@
             problem_title: prob.title,
             code: code.value,
             language: lang,
-            verdict: verdict,
-            score: score,
-            max_score: maxScore
+            verdict: overallVerdict,
+            score: ac,
+            max_score: total
           });
           if (subRes.error) console.warn('Supabase insert error:', subRes.error);
         } catch(e) { console.warn('Supabase error:', e); }
 
-        ojToast(ac === total ? 'Accepted!' : 'Đạt ' + ac + '/' + total + ' testcase', ac === total ? 'success' : 'error');
+        ojToast(ac === total ? 'Accepted! Thật tuyệt vời!' : 'Đã nộp bài: Đạt ' + ac + '/' + total + ' testcase', ac === total ? 'success' : 'error');
       } catch(e) {
         console.error(e);
-        vEl.textContent = 'Lỗi hệ thống'; vEl.style.color = '#ef4444';
-        if (dEl) dEl.innerHTML = '<div style="color:#ef4444;font-size:0.8rem">' + esc(e.message) + '</div>';
+        vEl.textContent = 'Lỗi hệ thống'; vEl.className = 'font-bold text-sm text-rose-500';
+        if (dEl) dEl.innerHTML = '<div class="text-rose-400 text-xs font-mono">' + esc(e.message) + '</div>';
         ojToast('Lỗi: ' + e.message, 'error');
       }
-      btn.disabled = false;
-      btn.innerHTML = 'Nộp bài';
-    }
 
-    try { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); } catch(e) {}
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="send" class="w-3.5 h-3.5"></i> Nộp bài';
+      try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch(e){}
+    }
   </script>
 </body>
 </html>
