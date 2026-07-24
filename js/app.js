@@ -10,6 +10,11 @@ const $  = (s, p) => (p || document).querySelector(s);
 const $$ = (s, p) => [...(p || document).querySelectorAll(s)];
 
 // ----------------------------------------------------------------
+//  CATEGORY NAME MAPPINGS
+// ----------------------------------------------------------------
+var CAT_NAMES = { dp:'Quy hoạch động', binary_search:'Chặt nhị phân', greedy:'Tham lam', graph:'Đồ thị', math:'Toán học', string:'Xử lý xâu', data_structure:'Cấu trúc dữ liệu', other:'Khác' };
+
+// ----------------------------------------------------------------
 //  LOCALSTORAGE KEYS
 // ----------------------------------------------------------------
 const LS_PROGRESS = 'voidbit_progress';
@@ -246,9 +251,9 @@ function loadProgress() {
     streakData = saved ? JSON.parse(saved) : { count: 0, lastDate: '' };
   } catch { streakData = { count: 0, lastDate: '' }; }
 
-  // Seed streak if not set
+  // Seed streak if not set (real value loaded asynchronously by renderStreak)
   if (!streakData.count) {
-    streakData = { count: 7, lastDate: new Date().toISOString().slice(0, 10) };
+    streakData = { count: 0, lastDate: '' };
     saveStreak();
   }
 }
@@ -331,6 +336,44 @@ function renderCourses() {
 function renderStreak() {
   var countEl = $('#streakCount');
   var dotsEl  = $('#streakDots');
+
+  /* Try fetching real AC submission dates from Supabase */
+  if (typeof supabaseClient !== 'undefined') {
+    var username = localStorage.getItem('voidbit_username');
+    if (username) {
+      supabaseClient.from('submissions').select('created_at').eq('username', username).eq('verdict', 'AC').then(function(res) {
+        if (!res.error && res.data && res.data.length > 0) {
+          var dates = {};
+          res.data.forEach(function(s) {
+            var d = s.created_at ? s.created_at.slice(0, 10) : '';
+            if (d) dates[d] = true;
+          });
+          var sorted = Object.keys(dates).sort().reverse();
+          var streak = 0;
+          var today = new Date();
+          today.setHours(0,0,0,0);
+          for (var i = 0; i < sorted.length; i++) {
+            var subDate = new Date(sorted[i] + 'T00:00:00');
+            var expected = new Date(today);
+            expected.setDate(expected.getDate() - streak);
+            if (subDate.getTime() === expected.getTime()) { streak++; }
+            else if (subDate.getTime() < expected.getTime()) break;
+          }
+          streakData.count = streak;
+          saveStreak();
+          renderNavStreak();
+        }
+        renderStreakUI(countEl, dotsEl);
+      }).catch(function() {
+        renderStreakUI(countEl, dotsEl);
+      });
+      return;
+    }
+  }
+  renderStreakUI(countEl, dotsEl);
+}
+
+function renderStreakUI(countEl, dotsEl) {
   if (countEl) countEl.textContent = streakData.count;
   if (dotsEl) {
     var s = streakData.count;
@@ -425,6 +468,39 @@ function renderProblemOfDay() {
   var container = $('#problemOfDayContainer');
   if (!container) return;
 
+  /* Try picking a random problem from OJ problem list, deterministic by date */
+  if (typeof PROBLEMS_INDEX !== 'undefined' && PROBLEMS_INDEX.length > 0) {
+    var today = new Date();
+    var dateStr = today.toISOString().slice(0, 10);
+    var hash = 0;
+    for (var i = 0; i < dateStr.length; i++) { hash = ((hash << 5) - hash) + dateStr.charCodeAt(i); hash |= 0; }
+    var idx = Math.abs(hash) % PROBLEMS_INDEX.length;
+    var p = PROBLEMS_INDEX[idx];
+
+    var badgeCls = p.difficulty === 'easy' ? 'badge-easy' : p.difficulty === 'medium' ? 'badge-medium' : 'badge-hard';
+    var badgeLabel = t('diff.' + p.difficulty);
+    var catName = CAT_NAMES && CAT_NAMES[p.category] ? CAT_NAMES[p.category] : (p.category || 'Khác');
+
+    container.innerHTML =
+      '<a href="problem.html?id=' + encodeURIComponent(p.id) + '" class="block">' +
+      '<div class="flex items-center gap-3 mb-3">' +
+        '<div class="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">' +
+          '<i data-lucide="brain" class="w-5 h-5 text-cyan-400"></i>' +
+        '</div>' +
+        '<div class="flex-1 min-w-0">' +
+          '<p class="text-sm font-semibold text-white truncate">' + escapeHtml(p.title) + '</p>' +
+          '<p class="text-xs text-slate-500">' + catName + ' &middot; ' + t('potd.rating') + ' ' + (p.cf_rating || '?') + '</p>' +
+        '</div>' +
+        '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ' + badgeCls + '">' + badgeLabel + '</span>' +
+      '</div>' +
+      '<div class="btn-primary w-full justify-center text-sm py-2.5">' +
+        '<i data-lucide="code-2" class="w-4 h-4"></i> ' + t('potd.solve') + '</div>' +
+      '</a>';
+    lucide.createIcons();
+    return;
+  }
+
+  /* Fallback to static data */
   var p = VOID_DATA.problemOfDay;
   var badgeCls = p.difficulty === 'easy' ? 'badge-easy' : p.difficulty === 'medium' ? 'badge-medium' : 'badge-hard';
   var badgeLabel = t('diff.' + p.difficulty);
