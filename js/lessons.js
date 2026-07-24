@@ -1,6 +1,6 @@
 // ================================================================
-//  VOID-BIT — Lesson Catalog (Modal)
-//  Browse categories → topics, then navigate to Lesson page.
+//  VOID-BIT — Lesson Catalog (Modal & Quick Navigator)
+//  Browse categories → topics, or open specific lesson directly.
 // ================================================================
 
 var viewStack = [];
@@ -39,6 +39,39 @@ function lessonNavBack() {
 function goToLesson(catId, lessonId) {
   closeLessonViewer();
   window.location.href = 'Lesson/index.html?cat=' + catId + '&id=' + lessonId;
+}
+
+// Open specific lesson directly by query or topic title
+function openLessonForMilestone(query) {
+  if (!query) {
+    openLessonViewer();
+    return;
+  }
+  var q = query.toLowerCase();
+  var matchedCat = null;
+  var matchedLesson = null;
+
+  if (typeof LESSONS !== 'undefined' && LESSONS.categories) {
+    for (var i = 0; i < LESSONS.categories.length; i++) {
+      var cat = LESSONS.categories[i];
+      for (var j = 0; j < cat.lessons.length; j++) {
+        var les = cat.lessons[j];
+        if (les.title.toLowerCase().indexOf(q) !== -1 || les.id.toLowerCase().indexOf(q) !== -1 || q.indexOf(les.id.toLowerCase()) !== -1) {
+          matchedCat = cat.id;
+          matchedLesson = les.id;
+          break;
+        }
+      }
+      if (matchedLesson) break;
+    }
+  }
+
+  if (matchedCat && matchedLesson) {
+    goToLesson(matchedCat, matchedLesson);
+  } else {
+    // Open viewer positioned at categories
+    openLessonViewer();
+  }
 }
 
 function renderLessonView() {

@@ -1,352 +1,509 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Void-bit — Zero to Hero in Competitive Programming</title>
+  <title>Void-bit — Next-Gen Hacker &amp; CP 3D Matrix Portal</title>
+  <meta name="description" content="Master C++, conquer algorithms, and dominate competitions — from provincial olympiads to ICPC World Finals with Void-bit.">
 
   <!-- Tailwind CDN (utility-only, custom styles in styles.css) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Custom Styles -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/lessons.css">
 </head>
-<body style="display:none">
+<body style="display:none" class="bg-[#03060d] text-slate-100 selection:bg-cyan-500/30 selection:text-cyan-300">
 
   <!-- ============================================================
-       NAVBAR
+       FLOATING CAPSULE NAVIGATION BAR
   ============================================================ -->
-  <nav class="glass fixed top-0 left-0 right-0 z-50 h-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
-      <!-- Logo / Profile -->
-      <div class="flex items-center gap-3" id="navProfile" style="cursor:pointer" onclick="openProfileModal()">
-        <div class="w-8 h-8 rounded-lg accent-bg flex items-center justify-center" id="navLogoIcon">
-          <span class="text-[#0b1120] font-extrabold text-sm">{ }</span>
-        </div>
-        <span class="text-xl font-extrabold tracking-tight text-white">
-          Void<span class="accent">-bit</span>
-        </span>
-        <div id="navUserBadge" class="flex items-center gap-2 ml-2 pl-2 border-l border-slate-700/50" style="display:none"></div>
+  <nav class="floating-nav flex items-center justify-between">
+    
+    <!-- Brand Logo / Profile -->
+    <div class="flex items-center gap-3 group shrink-0" id="navProfile" style="cursor:pointer" onclick="openProfileModal()">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-400 via-purple-600 to-pink-500 p-[1px] shadow-lg shadow-cyan-500/30 group-hover:scale-105 transition-all duration-300 overflow-hidden flex items-center justify-center shrink-0" id="navLogoIcon">
+        <img src="logo.jpg" alt="Void-bit Logo" class="w-full h-full object-cover rounded-full">
       </div>
+      <span class="text-xl sm:text-2xl font-black font-display tracking-tight text-white whitespace-nowrap flex items-center shrink-0">
+        Void<span class="text-cyber-cyan font-black">-bit</span>
+      </span>
+      <div id="navUserBadge" class="flex items-center gap-2 ml-2 pl-3 border-l border-slate-800" style="display:none"></div>
+    </div>
 
-      <!-- Desktop Links -->
-      <div class="hidden md:flex items-center gap-8">
-        <a href="#features"  class="text-sm font-medium text-slate-400 hover:text-white transition-colors" data-i18n="nav.features">Features</a>
-        <a href="#courses"   class="text-sm font-medium text-slate-400 hover:text-white transition-colors" data-i18n="nav.courses">Courses</a>
-        <a href="#roadmap"   class="text-sm font-medium text-slate-400 hover:text-white transition-colors" data-i18n="nav.roadmap">Roadmap</a>
-        <a href="forum.html"  class="text-sm font-medium text-slate-400 hover:text-white transition-colors" data-i18n="nav.forum">Forum</a>
-        <a href="chat.html"   class="text-sm font-medium text-slate-400 hover:text-white transition-colors" data-i18n="nav.chat">Chat</a>
-        <a href="oj-new.html" class="text-sm font-medium text-slate-400 hover:text-white transition-colors" data-i18n="nav.oj">OJ</a>
-        <a onclick="openLessonViewer()" class="text-sm font-medium text-slate-400 hover:text-white transition-colors cursor-pointer" data-i18n="nav.lessons">Lessons</a>
+    <!-- Desktop Navigation Pill Group -->
+    <div class="hidden lg:flex items-center gap-1 bg-slate-900/80 p-1.5 rounded-full border border-slate-800/80 backdrop-blur-2xl">
+      <a href="#features"  class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 rounded-full transition-all duration-200" data-i18n="nav.features">Features</a>
+      <a href="#courses"   class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 rounded-full transition-all duration-200" data-i18n="nav.courses">Courses</a>
+      <a href="#roadmap"   class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 rounded-full transition-all duration-200" data-i18n="nav.roadmap">Roadmap</a>
+      <a href="forum.html"  class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 rounded-full transition-all duration-200" data-i18n="nav.forum">Forum</a>
+      <a href="chat.html"   class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 rounded-full transition-all duration-200" data-i18n="nav.chat">Chat</a>
+      <a href="oj-new.html" class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 rounded-full transition-all duration-200" data-i18n="nav.oj">OJ</a>
+      <a onclick="openLessonViewer()" class="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-cyan-400 hover:bg-slate-800/80 rounded-full transition-all duration-200 cursor-pointer" data-i18n="nav.lessons">Lessons</a>
+    </div>
+
+    <!-- Right Quick Controls -->
+    <div class="flex items-center gap-3">
+      
+      <!-- Settings Panel Button -->
+      <button id="settingsBtn" onclick="openSettingsModal()" class="px-3.5 py-1.5 rounded-full text-xs font-black uppercase font-mono tracking-wider bg-slate-900/90 border border-cyan-500/40 text-cyan-300 hover:text-white hover:border-cyan-400 shadow-md shadow-cyan-500/20 hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5" title="Cyber Settings Panel">
+        <i data-lucide="settings" class="w-4 h-4 text-cyan-400"></i> SETTINGS
+      </button>
+
+      <!-- Hacker Matrix Vision Toggle Button -->
+      <button id="hackerModeBtn" onclick="toggleHackerMatrix()" class="px-3.5 py-1.5 rounded-full text-xs font-black uppercase font-mono tracking-wider bg-slate-900/90 border border-emerald-400 text-emerald-400 shadow-md shadow-emerald-500/30 hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5" title="Toggle Matrix Cyber Rain">
+        <i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i> MATRIX: ON
+      </button>
+
+      <!-- Streak Badge -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-cyan-500/30 shadow-inner">
+        <i data-lucide="zap" class="w-4 h-4 text-cyan-400 fill-cyan-400"></i>
+        <span class="text-xs font-extrabold text-cyan-400 font-mono" id="streakDisplay">0</span>
       </div>
+      
+      <!-- Language Switcher Button -->
+      <button id="langToggle" onclick="toggleLanguage()" class="px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-slate-900/90 border border-slate-800 text-slate-300 hover:text-cyan-400 hover:border-cyan-500/40 transition-all cursor-pointer shadow-sm" title="Switch language">EN</button>
+      
+      <!-- User Profile Avatar Button -->
+      <a href="profile.html" id="navAvatarBtn" class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-400 via-purple-600 to-pink-500 p-[2px] cursor-pointer hover:scale-105 transition-all shadow-lg shadow-cyan-500/30 overflow-hidden" style="text-decoration:none">
+        <img src="logo.jpg" alt="User Profile" class="w-full h-full object-cover rounded-full">
+      </a>
 
-      <!-- Right side -->
-      <div class="flex items-center gap-3">
-        <!-- Streak badge -->
-        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50">
-          <i data-lucide="zap" class="w-4 h-4 text-cyan-400"></i>
-          <span class="text-sm font-semibold text-cyan-400" id="streakDisplay">0</span>
-        </div>
-        <!-- Language Toggle -->
-        <button id="langToggle" onclick="toggleLanguage()" class="px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border border-slate-700/50 text-slate-400 hover:text-cyan-400 hover:border-cyan-500/30 transition-all cursor-pointer" title="Switch language">EN</button>
-        <!-- Avatar -->
-        <a href="profile.html" id="navAvatarBtn" class="w-9 h-9 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-xs font-bold text-white cursor-pointer hover:ring-2 hover:ring-cyan-400/50 transition-all" style="text-decoration:none">
-          V
-        </a>
-        <!-- Hamburger (mobile) -->
-        <div class="md:hidden hamburger" id="hamburgerBtn">
-          <span></span><span></span><span></span>
-        </div>
+      <!-- Mobile Hamburger Button -->
+      <div class="lg:hidden hamburger p-2 rounded-full bg-slate-900/90 border border-slate-800" id="hamburgerBtn">
+        <span></span><span></span><span></span>
       </div>
     </div>
   </nav>
 
-  <!-- Mobile Navigation Menu -->
+  <!-- Mobile Drawer Menu -->
   <div class="nav-mobile" id="mobileMenu">
-    <a href="#features" class="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors" data-i18n="nav.features">Features</a>
-    <a href="#courses"  class="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors" data-i18n="nav.courses">Courses</a>
-    <a href="#roadmap"  class="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors" data-i18n="nav.roadmap">Roadmap</a>
-    <a href="forum.html" class="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors" data-i18n="nav.forum">Forum</a>
-    <a href="chat.html"  class="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors" data-i18n="nav.chat">Chat</a>
-    <a href="oj-new.html" class="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors" data-i18n="nav.oj">OJ</a>
-    <a onclick="openLessonViewer();document.getElementById('mobileMenu').classList.remove('open');document.getElementById('hamburgerBtn').classList.remove('active');" class="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors cursor-pointer" data-i18n="nav.lessons">Lessons</a>
-    <a href="profile.html" class="block px-4 py-3 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-800/50 transition-colors">Profile</a>
+    <a href="#features" class="block px-4 py-3 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-800/80 hover:text-cyan-400 transition-colors" data-i18n="nav.features">Features</a>
+    <a href="#courses"  class="block px-4 py-3 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-800/80 hover:text-cyan-400 transition-colors" data-i18n="nav.courses">Courses</a>
+    <a href="#roadmap"  class="block px-4 py-3 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-800/80 hover:text-cyan-400 transition-colors" data-i18n="nav.roadmap">Roadmap</a>
+    <a href="forum.html" class="block px-4 py-3 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-800/80 hover:text-cyan-400 transition-colors" data-i18n="nav.forum">Forum</a>
+    <a href="chat.html"  class="block px-4 py-3 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-800/80 hover:text-cyan-400 transition-colors" data-i18n="nav.chat">Chat</a>
+    <a href="oj-new.html" class="block px-4 py-3 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-800/80 hover:text-cyan-400 transition-colors" data-i18n="nav.oj">OJ</a>
+    <a onclick="openLessonViewer();document.getElementById('mobileMenu').classList.remove('open');document.getElementById('hamburgerBtn').classList.remove('active');" class="block px-4 py-3 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-800/80 hover:text-cyan-400 transition-colors cursor-pointer" data-i18n="nav.lessons">Lessons</a>
+    <a href="profile.html" class="block px-4 py-3 rounded-2xl text-sm font-bold text-slate-300 hover:bg-slate-800/80 hover:text-cyan-400 transition-colors">Profile</a>
   </div>
 
   <!-- ============================================================
-       HERO
+       RADICAL HERO COMMAND CENTER
   ============================================================ -->
-  <header class="relative min-h-screen flex items-center pt-16 overflow-hidden">
-    <div class="hero-glow top-[-100px] left-[-100px]"></div>
-    <div class="hero-glow bottom-[-100px] right-[-100px]"></div>
+  <header class="relative min-h-screen flex items-center pt-32 pb-20 overflow-hidden">
+    
+    <!-- Background Ambient Lights -->
+    <div class="absolute top-1/4 left-10 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute top-1/3 right-10 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
-      <div class="grid lg:grid-cols-2 gap-12 items-center">
-        <!-- Left: Text -->
-        <div class="space-y-8">
-          <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium">
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+      
+      <div class="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+        
+        <!-- Left Hero Command Column -->
+        <div class="lg:col-span-7 space-y-8 text-left">
+          
+          <!-- Live Telemetry Pill -->
+          <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-900/90 border border-cyan-500/40 text-cyan-400 text-xs sm:text-sm font-extrabold tracking-wide uppercase shadow-lg shadow-cyan-500/10 backdrop-blur-xl">
+            <span class="flex h-2.5 w-2.5 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
+            </span>
+            <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
             <span data-i18n="hero.badge">The Ultimate CP Learning Platform</span>
           </div>
 
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-white">
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Void-bit:</span><br>
-            <span data-i18n="hero.title.line2">Zero to Hero in</span><br>
-            <span data-i18n="hero.title.line3">Competitive Programming</span>
+          <!-- Main Hero Headline -->
+          <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black font-display leading-[1.08] tracking-tight text-white">
+            <span class="text-cyber-cyan font-black">Void-bit:</span><br>
+            <span data-i18n="hero.title.line2" class="text-slate-100">Zero to Hero in</span><br>
+            <span data-i18n="hero.title.line3" class="text-slate-400 font-bold">Competitive Programming</span>
           </h1>
 
-          <p class="text-lg text-slate-400 max-w-lg leading-relaxed">
+          <!-- Description -->
+          <p class="text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed">
             <span data-i18n="hero.desc">Master C++, conquer algorithms, and dominate competitions — from provincial olympiads to ICPC World Finals.</span>
           </p>
 
-          <div class="flex flex-wrap gap-4">
-            <a href="#roadmap" class="btn-primary">
+          <!-- Action Launch Bar -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+            <a href="#roadmap" class="btn-cyber-primary">
               <i data-lucide="map" class="w-5 h-5"></i>
               <span data-i18n="hero.btn.roadmap">Explore Roadmaps</span>
             </a>
-            <a href="#courses" class="btn-secondary">
+            <a href="#courses" class="btn-cyber-outline">
               <i data-lucide="play-circle" class="w-5 h-5"></i>
               <span data-i18n="hero.btn.lessons">Start Learning</span>
             </a>
           </div>
 
-          <div class="flex items-center gap-6 text-sm text-slate-500 pt-4">
-            <div class="flex items-center gap-2">
-              <i data-lucide="users" class="w-4 h-4 text-cyan-400"></i> 12,400+ <span data-i18n="hero.stat1">learners</span>
+          <!-- Student Achievements Spotlight -->
+          <div class="pt-8 border-t border-slate-800/80">
+            <p class="text-xs font-mono font-bold uppercase tracking-widest text-cyan-400 mb-3.5 flex items-center gap-1.5">
+              <i data-lucide="award" class="w-4 h-4 text-cyan-400"></i> Thành Tích Nổi Bật Của Học Viên Void-bit
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-left">
+              
+              <!-- Achievement 1 -->
+              <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-amber-500/30 hover:border-amber-400/60 backdrop-blur-xl transition-all shadow-md hover:scale-105 group">
+                <div class="flex items-center gap-1.5 text-amber-400 mb-1">
+                  <i data-lucide="trophy" class="w-4 h-4 shrink-0"></i>
+                  <span class="text-xs font-black font-display uppercase tracking-tight">Nhất HSG Tỉnh</span>
+                </div>
+                <div class="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors leading-tight">
+                  Giải Nhất vượt cấp (THCS &amp; THPT)
+                </div>
+              </div>
+
+              <!-- Achievement 2 -->
+              <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-cyan-500/30 hover:border-cyan-400/60 backdrop-blur-xl transition-all shadow-md hover:scale-105 group">
+                <div class="flex items-center gap-1.5 text-cyan-400 mb-1">
+                  <i data-lucide="bot" class="w-4 h-4 shrink-0"></i>
+                  <span class="text-xs font-black font-display uppercase tracking-tight">Olympic VOAI</span>
+                </div>
+                <div class="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors leading-tight">
+                  Đội tuyển Olympic AI Quốc Gia
+                </div>
+              </div>
+
+              <!-- Achievement 3 -->
+              <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-purple-500/30 hover:border-purple-400/60 backdrop-blur-xl transition-all shadow-md hover:scale-105 group">
+                <div class="flex items-center gap-1.5 text-purple-400 mb-1">
+                  <i data-lucide="flame" class="w-4 h-4 shrink-0"></i>
+                  <span class="text-xs font-black font-display uppercase tracking-tight">Master CF</span>
+                </div>
+                <div class="text-[11px] font-bold text-slate-300 group-hover:text-white transition-colors leading-tight">
+                  Master Codeforces (Rating 2100+)
+                </div>
+              </div>
+
+              <!-- Achievement 4 -->
+              <div class="bg-slate-900/80 p-3.5 rounded-2xl border border-emerald-500/30 hover:border-emerald-400/60 backdrop-blur-xl transition-all shadow-md hover:scale-105 group">
+                <div class="flex items-center gap-1.5 text-emerald-400 mb-1">
+                  <i data-lucide="globe" class="w-4 h-4 shrink-0"></i>
+                  <span class="text-xs font-black font-display uppercase tracking-tight">Top 44 ICPC NERC</span>
+                </div>
+                <div class="text-[10px] font-bold text-slate-300 group-hover:text-white transition-colors leading-tight">
+                  Top 44 2025-2026 ICPC, NERC, Northern Eurasia Finals (Online Mirror)
+                </div>
+              </div>
+
             </div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="star" class="w-4 h-4 text-amber-400"></i> 4.9 / 5.0 <span data-i18n="hero.stat2">rating</span>
+          </div>
+
+        </div>
+
+        <!-- Right Hero Interactive Cyber Engine Console -->
+        <div class="lg:col-span-5 flex justify-center lg:justify-end">
+          <div class="cyber-terminal w-full max-w-xl">
+            
+            <!-- Terminal Header -->
+            <div class="cyber-terminal-header">
+              <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <span class="text-xs font-mono text-cyan-400 ml-2 font-bold flex items-center gap-1.5">
+                  <i data-lucide="terminal" class="w-4 h-4"></i> void-bit/engine.cpp
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold border border-emerald-500/30">ACCEPTED 15ms</span>
+              </div>
             </div>
+
+            <!-- Terminal Body -->
+            <div class="cyber-terminal-body">
+              <pre class="text-slate-300"><span class="text-purple-400 font-bold">// Competitive Programming Engine</span>
+<span class="text-purple-400 font-bold">#include</span> <span class="text-emerald-400">&lt;bits/stdc++.h&gt;</span>
+<span class="text-purple-400 font-bold">using namespace</span> <span class="text-amber-400">std</span>;
+
+<span class="text-purple-400 font-bold">int</span> <span class="text-cyan-400">main</span>() {
+  <span class="text-amber-400">ios::sync_with_stdio</span>(<span class="text-purple-400">false</span>);
+  <span class="text-amber-400">cin</span>.tie(<span class="text-purple-400">nullptr</span>);
+
+  <span class="text-purple-400">int</span> n; <span class="text-amber-400">cin</span> &gt;&gt; n;
+  <span class="text-amber-400">vector</span>&lt;<span class="text-purple-400">int</span>&gt; a(n);
+
+  <span class="text-purple-400">for</span> (<span class="text-purple-400">int</span> &amp;x : a) <span class="text-amber-400">cin</span> &gt;&gt; x;
+  <span class="text-cyan-400">sort</span>(a.<span class="text-cyan-400">begin</span>(), a.<span class="text-cyan-400">end</span>());
+
+  <span class="text-purple-400">long long</span> ans = <span class="text-amber-400">0</span>;
+  <span class="text-purple-400">for</span> (<span class="text-purple-400">int</span> i = <span class="text-amber-400">0</span>; i &lt; n; i++)
+    ans += (<span class="text-purple-400">long long</span>)a[i] * (i + <span class="text-amber-400">1</span>);
+
+  <span class="text-amber-400">cout</span> &lt;&lt; ans &lt;&lt; <span class="text-emerald-400">"\n"</span>;
+  <span class="text-purple-400">return</span> <span class="text-amber-400">0</span>;
+}<span class="inline-block w-2 h-4 bg-cyan-400 animate-pulse align-middle ml-1"></span></pre>
+              
+              <!-- Console Output Simulator -->
+              <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs font-mono">
+                <span class="text-slate-500">&gt; Input: N=5 [4, 1, 3, 2, 5]</span>
+                <span class="text-cyan-400 font-bold">&gt; Output: 35</span>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- Right: Animated Code Editor -->
-        <div class="hidden lg:flex justify-center float-anim">
-          <div class="code-block w-full max-w-md">
-            <div class="flex items-center gap-2 px-4 py-3 border-b border-slate-800 bg-slate-900/50">
-              <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
-              <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-              <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
-              <span class="text-xs text-slate-600 ml-2">void-bit/learn.cpp</span>
-            </div>
-            <pre><span class="code-line"><span class="cm">// Competitive Programming</span></span>
-<span class="code-line"><span class="kw">#include</span> <span class="str">&lt;bits/stdc++.h&gt;</span></span>
-<span class="code-line"><span class="kw">using namespace</span> <span class="tp">std</span>;</span>
-<span class="code-line"> </span>
-<span class="code-line"><span class="kw">int</span> <span class="fn">main</span>() {</span>
-<span class="code-line">  <span class="tp">ios::sync_with_stdio</span>(<span class="kw">false</span>);</span>
-<span class="code-line">  <span class="tp">cin</span>.tie(<span class="kw">nullptr</span>);</span>
-<span class="code-line"> </span>
-<span class="code-line">  <span class="kw">int</span> n; <span class="tp">cin</span> <span class="op">&gt;&gt;</span> n;</span>
-<span class="code-line">  <span class="tp">vector</span><span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;</span> a(n);</span>
-<span class="code-line"> </span>
-<span class="code-line">  <span class="kw">for</span> (<span class="kw">int</span> <span class="op">&amp;</span>x : a) <span class="tp">cin</span> <span class="op">&gt;&gt;</span> x;</span>
-<span class="code-line">  <span class="fn">sort</span>(a.<span class="fn">begin</span>(), a.<span class="fn">end</span>());</span>
-<span class="code-line"> </span>
-<span class="code-line">  <span class="kw">long</span> <span class="kw">long</span> ans <span class="op">=</span> <span class="num">0</span>;</span>
-<span class="code-line">  <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="num">0</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>)</span>
-<span class="code-line">    ans <span class="op">+=</span> (<span class="kw">long</span> <span class="kw">long</span>)a[i] <span class="op">*</span> (i <span class="op">+</span> <span class="num">1</span>);</span>
-<span class="code-line"> </span>
-<span class="code-line">  <span class="tp">cout</span> <span class="op">&lt;&lt;</span> ans <span class="op">&lt;&lt;</span> <span class="str">"\n"</span>;</span>
-<span class="code-line">  <span class="kw">return</span> <span class="num">0</span>;</span>
-<span class="code-line">}<span class="cursor-blink"></span></span></pre>
-          </div>
-        </div>
       </div>
     </div>
   </header>
 
   <!-- ============================================================
-       FEATURES
+       FUTURISTIC BENTO GRID MATRIX (#features)
   ============================================================ -->
-  <section id="features" class="py-20 relative fade-in">
+  <section id="features" class="py-24 relative fade-in">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-16">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4"><span data-i18n="features.badge">Why Void-bit?</span></span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white" data-i18n="features.title">Built for Champions</h2>
-        <p class="text-slate-400 mt-3 max-w-xl mx-auto" data-i18n="features.subtitle">Everything you need from absolute beginner to international medalist.</p>
+      
+      <!-- Section Header -->
+      <div class="text-center mb-16 space-y-4">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-extrabold uppercase tracking-widest font-mono">
+          <i data-lucide="cpu" class="w-4 h-4"></i>
+          <span data-i18n="features.badge">Why Void-bit?</span>
+        </span>
+        <h2 class="text-4xl sm:text-6xl font-black font-display tracking-tight text-white" data-i18n="features.title">
+          Built for Champions
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto" data-i18n="features.subtitle">
+          Everything you need from absolute beginner to international medalist.
+        </p>
       </div>
 
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="stat-card text-center">
-          <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mx-auto mb-4">
-            <i data-lucide="route" class="w-6 h-6 text-cyan-400"></i>
+      <!-- Bento Grid Matrix -->
+      <div class="bento-grid">
+        
+        <!-- Bento Card 1 -->
+        <div class="bento-card col-span-12 sm:col-span-6 lg:col-span-3">
+          <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mb-6">
+            <i data-lucide="route" class="w-7 h-7 text-cyan-400"></i>
           </div>
-          <h3 class="text-lg font-bold text-white mb-2" data-i18n="features.card1.title">Structured Roadmaps</h3>
-          <p class="text-sm text-slate-400" data-i18n="features.card1.desc">4 curated pathways from C++ basics to ICPC-level mastery.</p>
+          <h3 class="text-xl font-bold font-display text-white mb-2" data-i18n="features.card1.title">Structured Roadmaps</h3>
+          <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.card1.desc">5 curated pathways from C++ basics to ICPC &amp; Tourist-level mastery.</p>
         </div>
-        <div class="stat-card text-center">
-          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-            <i data-lucide="trophy" class="w-6 h-6 text-emerald-400"></i>
+
+        <!-- Bento Card 2 -->
+        <div class="bento-card col-span-12 sm:col-span-6 lg:col-span-3">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-6">
+            <i data-lucide="trophy" class="w-7 h-7 text-emerald-400"></i>
           </div>
-          <h3 class="text-lg font-bold text-white mb-2" data-i18n="features.card2.title">Gamified Learning</h3>
-          <p class="text-sm text-slate-400" data-i18n="features.card2.desc">Streaks, leaderboards, and achievements keep you motivated.</p>
+          <h3 class="text-xl font-bold font-display text-white mb-2" data-i18n="features.card2.title">Gamified Learning</h3>
+          <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.card2.desc">Streaks, leaderboards, and achievements keep you motivated.</p>
         </div>
-        <div class="stat-card text-center">
-          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-4">
-            <i data-lucide="brain" class="w-6 h-6 text-purple-400"></i>
+
+        <!-- Bento Card 3 -->
+        <div class="bento-card col-span-12 sm:col-span-6 lg:col-span-3">
+          <div class="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center mb-6">
+            <i data-lucide="brain" class="w-7 h-7 text-purple-400"></i>
           </div>
-          <h3 class="text-lg font-bold text-white mb-2" data-i18n="features.card3.title">Deep Curriculum</h3>
-          <p class="text-sm text-slate-400" data-i18n="features.card3.desc">60+ topics, 200+ problems, and detailed subtopic breakdowns.</p>
+          <h3 class="text-xl font-bold font-display text-white mb-2" data-i18n="features.card3.title">Deep Curriculum</h3>
+          <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.card3.desc">60+ topics, 200+ problems, and detailed subtopic breakdowns.</p>
         </div>
-        <div class="stat-card text-center">
-          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-4">
-            <i data-lucide="code" class="w-6 h-6 text-amber-400"></i>
+
+        <!-- Bento Card 4 -->
+        <div class="bento-card col-span-12 sm:col-span-6 lg:col-span-3">
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mb-6">
+            <i data-lucide="code" class="w-7 h-7 text-amber-400"></i>
           </div>
-          <h3 class="text-lg font-bold text-white mb-2" data-i18n="features.card4.title">Practice-First</h3>
-          <p class="text-sm text-slate-400" data-i18n="features.card4.desc">Every concept backed by curated practice problems from Codeforces.</p>
+          <h3 class="text-xl font-bold font-display text-white mb-2" data-i18n="features.card4.title">Practice-First</h3>
+          <p class="text-sm text-slate-400 leading-relaxed" data-i18n="features.card4.desc">Every concept backed by curated practice problems from Codeforces.</p>
         </div>
+
       </div>
+
     </div>
   </section>
 
   <!-- ============================================================
-       COURSES + DASHBOARD SIDEBAR
+       INTERACTIVE COURSES & DASHBOARD (#courses)
   ============================================================ -->
-  <section id="courses" class="py-20 relative border-t border-slate-800/80 fade-in">
+  <section id="courses" class="py-24 relative fade-in bg-slate-950/60 border-t border-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-16">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4"><span data-i18n="courses.badge">Curriculum</span></span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white" data-i18n="courses.title">Course Library</h2>
-        <p class="text-slate-400 mt-3 max-w-xl mx-auto" data-i18n="courses.subtitle">Core topic areas with structured lessons and progress tracking.</p>
+      
+      <!-- Section Header -->
+      <div class="text-center mb-16 space-y-4">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-extrabold uppercase tracking-widest font-mono">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span data-i18n="courses.badge">Curriculum</span>
+        </span>
+        <h2 class="text-4xl sm:text-6xl font-black font-display tracking-tight text-white" data-i18n="courses.title">
+          Course Library
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto" data-i18n="courses.subtitle">
+          Core topic areas with structured lessons and progress tracking.
+        </p>
       </div>
 
-      <div class="grid lg:grid-cols-3 gap-8">
-        <!-- Course Grid -->
+      <div class="grid lg:grid-cols-3 gap-8 items-start">
+        
+        <!-- Main Courses Container (Populated by js/app.js) -->
         <div class="lg:col-span-2">
-          <div class="grid sm:grid-cols-2 gap-5" id="coursesContainer"></div>
+          <div class="grid sm:grid-cols-2 gap-6" id="coursesContainer"></div>
         </div>
 
-        <!-- Dashboard Sidebar -->
-        <div class="space-y-5">
-          <!-- Daily Streak -->
-          <div class="stat-card">
+        <!-- Dashboard Widgets -->
+        <div class="space-y-6">
+          
+          <!-- Daily Streak Widget -->
+          <div class="card border-slate-800">
             <div class="flex items-center gap-3 mb-4">
-              <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
-              <h3 class="font-bold text-white" data-i18n="streak.title">Daily Streak</h3>
+              <div class="w-10 h-10 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center">
+                <i data-lucide="flame" class="w-5 h-5 text-orange-400"></i>
+              </div>
+              <h3 class="font-bold font-display text-white text-lg" data-i18n="streak.title">Daily Streak</h3>
             </div>
-            <div class="flex items-end gap-3">
-              <span class="text-4xl font-extrabold text-white" id="streakCount">0</span>
-              <span class="text-slate-400 text-sm mb-1" data-i18n="streak.days">days</span>
+            <div class="flex items-end gap-3 my-2">
+              <span class="text-5xl font-black text-white font-mono tracking-tight" id="streakCount">0</span>
+              <span class="text-slate-400 font-bold text-sm mb-1.5" data-i18n="streak.days">days</span>
             </div>
-            <div class="flex gap-1 mt-3" id="streakDots"></div>
-            <p class="text-xs text-slate-500 mt-3" data-i18n="streak.msg">Solve at least one problem daily to maintain your streak!</p>
+            <div class="flex gap-2 mt-4" id="streakDots"></div>
+            <p class="text-xs text-slate-500 mt-4 leading-relaxed" data-i18n="streak.msg">Solve at least one problem daily to maintain your streak!</p>
           </div>
 
-          <!-- Leaderboard -->
-          <div class="stat-card">
+          <!-- Leaderboard Widget -->
+          <div class="card border-slate-800">
             <div class="flex items-center gap-3 mb-4">
-              <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
-              <h3 class="font-bold text-white" data-i18n="leaderboard">Leaderboard</h3>
+              <div class="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+                <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
+              </div>
+              <h3 class="font-bold font-display text-white text-lg" data-i18n="leaderboard">Leaderboard</h3>
             </div>
-            <div class="space-y-1" id="leaderboardContainer"></div>
+            <div class="space-y-2" id="leaderboardContainer"></div>
           </div>
 
-          <!-- Problem of the Day -->
-          <div class="stat-card bg-gradient-to-br from-cyan-500/5 to-blue-500/5 border-cyan-500/20">
+          <!-- Problem of the Day Spotlight Card -->
+          <div class="card bg-gradient-to-br from-cyan-500/10 via-slate-950 to-purple-600/10 border-cyan-500/30">
             <div class="flex items-center gap-3 mb-3">
-              <i data-lucide="calendar" class="w-5 h-5 text-cyan-400"></i>
-              <h3 class="font-bold text-white" data-i18n="potd.title">Problem of the Day</h3>
+              <div class="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
+                <i data-lucide="calendar" class="w-5 h-5 text-cyan-300"></i>
+              </div>
+              <h3 class="font-bold font-display text-white text-lg" data-i18n="potd.title">Problem of the Day</h3>
             </div>
             <div id="problemOfDayContainer"></div>
           </div>
+
         </div>
+
       </div>
+
     </div>
   </section>
 
   <!-- ============================================================
-       INTERACTIVE ROADMAP
+       INTERACTIVE PATHWAY ROADMAP (#roadmap)
   ============================================================ -->
-  <section id="roadmap" class="py-20 relative border-t border-slate-800/80 fade-in">
+  <section id="roadmap" class="py-24 relative fade-in">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12">
-        <span class="inline-block px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-sm font-medium mb-4"><span data-i18n="roadmap.badge">Learning Path</span></span>
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white" data-i18n="roadmap.title">The Ultimate CP Roadmap</h2>
-        <p class="text-slate-400 mt-3 max-w-xl mx-auto" data-i18n="roadmap.subtitle">Choose your pathway and track your progress milestone by milestone.</p>
+      
+      <!-- Section Header -->
+      <div class="text-center mb-12 space-y-4">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-extrabold uppercase tracking-widest font-mono">
+          <i data-lucide="compass" class="w-4 h-4"></i>
+          <span data-i18n="roadmap.badge">Learning Path</span>
+        </span>
+        <h2 class="text-4xl sm:text-6xl font-black font-display tracking-tight text-white" data-i18n="roadmap.title">
+          The Ultimate CP Roadmap
+        </h2>
+        <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto" data-i18n="roadmap.subtitle">
+          Choose your pathway and track your progress milestone by milestone.
+        </p>
       </div>
 
-      <!-- Tab Controls -->
-      <div class="flex flex-wrap justify-center gap-2 mb-10" id="tabContainer"></div>
+      <!-- Roadmap Pathway Tabs -->
+      <div class="flex flex-wrap justify-center gap-3 mb-12" id="tabContainer"></div>
 
-      <!-- Roadmap Content + Sidebar -->
-      <div class="grid lg:grid-cols-4 gap-8">
+      <!-- Roadmap Main Content & Sidebar -->
+      <div class="grid lg:grid-cols-4 gap-8 items-start">
         <div class="lg:col-span-3" id="roadmapContent"></div>
-        <div class="space-y-4" id="roadmapSidebar"></div>
+        <div class="space-y-6" id="roadmapSidebar"></div>
       </div>
+
     </div>
   </section>
 
   <!-- ============================================================
-       FORUM (Supabase)
+       COMMUNITY FORUM SECTION (#forum)
   ============================================================ -->
-  <section id="forum" class="py-20 relative border-t border-slate-800/80 fade-in">
+  <section id="forum" class="py-24 relative fade-in bg-slate-950/60 border-t border-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div id="forumContent"></div>
     </div>
   </section>
 
   <!-- ============================================================
-       FOOTER
+       FUTURISTIC CYBER FOOTER
   ============================================================ -->
-  <footer class="border-t border-slate-800/80 py-12 fade-in">
+  <footer class="border-t border-slate-900 pt-16 pb-12 fade-in bg-[#020409]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <!-- Brand -->
-        <div>
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 rounded-lg accent-bg flex items-center justify-center">
-              <span class="text-[#0b1120] font-extrabold text-sm">{ }</span>
+      
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        
+        <!-- Column 1: Brand Info -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-400 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 overflow-hidden">
+              <img src="logo.jpg" alt="Void-bit Logo" class="w-full h-full object-cover rounded-full">
             </div>
-            <span class="text-xl font-extrabold tracking-tight text-white">Void<span class="accent">-bit</span></span>
+            <span class="text-2xl font-black font-display tracking-tight text-white">Void<span class="text-cyan-400">-bit</span></span>
           </div>
-          <p class="text-sm text-slate-400 leading-relaxed" data-i18n="footer.brand">Zero to Hero in Competitive Programming. Master algorithms, conquer contests.</p>
+          <p class="text-sm text-slate-400 leading-relaxed" data-i18n="footer.brand">
+            Zero to Hero in Competitive Programming. Master algorithms, conquer contests.
+          </p>
         </div>
-        <!-- Learn -->
+
+        <!-- Column 2: Learn -->
         <div>
-          <h4 class="font-bold text-white mb-4 text-sm uppercase tracking-wider" data-i18n="footer.learn">Learn</h4>
-          <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">C++ Basics</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">Data Structures</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">Algorithms</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">Dynamic Programming</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">Math for CP</a></li>
+          <h4 class="font-bold text-white mb-4 text-xs uppercase tracking-wider text-cyan-400 font-mono" data-i18n="footer.learn">Learn</h4>
+          <ul class="space-y-2.5 text-sm text-slate-400">
+            <li><a href="#courses" class="hover:text-cyan-400 transition-colors">C++ Basics</a></li>
+            <li><a href="#courses" class="hover:text-cyan-400 transition-colors">Data Structures</a></li>
+            <li><a href="#courses" class="hover:text-cyan-400 transition-colors">Algorithms</a></li>
+            <li><a href="#courses" class="hover:text-cyan-400 transition-colors">Dynamic Programming</a></li>
+            <li><a href="#courses" class="hover:text-cyan-400 transition-colors">Math for CP</a></li>
           </ul>
         </div>
-        <!-- Paths -->
+
+        <!-- Column 3: Paths -->
         <div>
-          <h4 class="font-bold text-white mb-4 text-sm uppercase tracking-wider" data-i18n="footer.paths">Paths</h4>
-          <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">Basics &amp; C++</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">HSG Tỉnh</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">HSG Quốc Gia</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">IOI &amp; ICPC</a></li>
+          <h4 class="font-bold text-white mb-4 text-xs uppercase tracking-wider text-cyan-400 font-mono" data-i18n="footer.paths">Paths</h4>
+          <ul class="space-y-2.5 text-sm text-slate-400">
+            <li><a href="#roadmap" class="hover:text-cyan-400 transition-colors">HSG THCS (Cấp II)</a></li>
+            <li><a href="#roadmap" class="hover:text-cyan-400 transition-colors">HSG Tỉnh (THPT)</a></li>
+            <li><a href="#roadmap" class="hover:text-cyan-400 transition-colors">VOI — HSG Quốc Gia</a></li>
+            <li><a href="#roadmap" class="hover:text-cyan-400 transition-colors">Noob to Tourist (3000+)</a></li>
           </ul>
         </div>
-        <!-- Community -->
+
+        <!-- Column 4: Community -->
         <div>
-          <h4 class="font-bold text-white mb-4 text-sm uppercase tracking-wider" data-i18n="footer.community">Community</h4>
-          <ul class="space-y-2 text-sm text-slate-400">
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">Discord</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">GitHub</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">Blog</a></li>
-            <li><a href="#" class="hover:text-cyan-400 transition-colors">Contact</a></li>
+          <h4 class="font-bold text-white mb-4 text-xs uppercase tracking-wider text-cyan-400 font-mono" data-i18n="footer.community">Community</h4>
+          <ul class="space-y-2.5 text-sm text-slate-400">
+            <li><a href="forum.html" class="hover:text-cyan-400 transition-colors">Forum Discussion</a></li>
+            <li><a href="chat.html" class="hover:text-cyan-400 transition-colors">Live Chat</a></li>
+            <li><a href="oj-new.html" class="hover:text-cyan-400 transition-colors">Online Judge</a></li>
+            <li><a href="leaderboard.html" class="hover:text-cyan-400 transition-colors">Global Standings</a></li>
           </ul>
         </div>
+
       </div>
 
-      <div class="mt-10 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p class="text-xs text-slate-600">&copy; 2026 Void-bit. <span data-i18n="footer.copyright">Built for competitive programmers, by competitive programmers.</span> <span class="text-cyan-500/60 font-mono">v1.0.0</span></p>
-        <div class="flex items-center gap-4 text-slate-600">
+      <!-- Bottom Status Bar -->
+      <div class="mt-12 pt-8 border-t border-slate-900/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-slate-500">
+          &copy; 2026 Void-bit. <span data-i18n="footer.copyright">Built for competitive programmers, by competitive programmers.</span> 
+          <span class="ml-2 inline-block px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 font-mono text-[11px] border border-cyan-500/30 font-bold">v4.0 Noob to Tourist</span>
+        </p>
+        <div class="flex items-center gap-5 text-slate-400">
           <a href="#" class="hover:text-cyan-400 transition-colors"><i data-lucide="github" class="w-4 h-4"></i></a>
           <a href="#" class="hover:text-cyan-400 transition-colors"><i data-lucide="twitter" class="w-4 h-4"></i></a>
           <a href="#" class="hover:text-cyan-400 transition-colors"><i data-lucide="youtube" class="w-4 h-4"></i></a>
         </div>
       </div>
+
     </div>
   </footer>
 
@@ -365,10 +522,76 @@
     </div>
   </div>
 
-  <!-- Scripts (order matters) -->
-  <!-- Supabase JS client (must load before config) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- ============================================================
+       CYBER SETTINGS CONTROL PANEL MODAL
+  ============================================================ -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="modal-panel max-w-md">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
+            <i data-lucide="settings" class="w-4.5 h-4.5 text-cyan-400"></i>
+          </div>
+          <h3 class="text-xl font-black font-display text-white">Cyber Settings Panel</h3>
+        </div>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
 
+      <div class="py-6 space-y-5 text-sm">
+        
+        <!-- Setting 1: Matrix Rain -->
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+          <div>
+            <div class="font-bold text-white flex items-center gap-2"><i data-lucide="terminal" class="w-4 h-4 text-emerald-400"></i> Mưa Ma Trận (Matrix Rain)</div>
+            <div class="text-xs text-slate-400 mt-0.5">Bật/tắt dòng chữ ma trận xanh neon</div>
+          </div>
+          <input type="checkbox" id="toggleMatrixRain" onchange="updateSetting('matrixRain', this.checked)" class="milestone-checkbox">
+        </div>
+
+        <!-- Setting 2: 3D Tilt Effect -->
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+          <div>
+            <div class="font-bold text-white flex items-center gap-2"><i data-lucide="box" class="w-4 h-4 text-cyan-400"></i> Hiệu ứng Card 3D Tilt</div>
+            <div class="text-xs text-slate-400 mt-0.5">Bật/tắt hiệu ứng nghiêng 3D khi rê chuột</div>
+          </div>
+          <input type="checkbox" id="toggleTilt3D" onchange="updateSetting('tilt3D', this.checked)" class="milestone-checkbox">
+        </div>
+
+        <!-- Setting 3: 3D Constellations -->
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+          <div>
+            <div class="font-bold text-white flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i> Chòm Sao 3D (Constellations)</div>
+            <div class="text-xs text-slate-400 mt-0.5">Bật/tắt mạng lưới ngôi sao liên kết 3D</div>
+          </div>
+          <input type="checkbox" id="toggleConstellation" onchange="updateSetting('constellation3D', this.checked)" class="milestone-checkbox">
+        </div>
+
+        <!-- Setting 4: Hide Graph for THCS -->
+        <div class="flex items-center justify-between p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800">
+          <div>
+            <div class="font-bold text-white flex items-center gap-2"><i data-lucide="graduation-cap" class="w-4 h-4 text-amber-400"></i> Tối ưu THCS (Không Đồ Thị)</div>
+            <div class="text-xs text-slate-400 mt-0.5">Tối ưu kiến thức dành cho học sinh Cấp II</div>
+          </div>
+          <input type="checkbox" id="toggleHideGraphTHCS" onchange="updateSetting('hideGraphInTHCS', this.checked)" class="milestone-checkbox">
+        </div>
+
+      </div>
+
+      <div class="pt-4 border-t border-slate-800 flex justify-end">
+        <button onclick="closeSettingsModal()" class="btn-cyber-primary py-2.5 px-6 text-xs">
+          Lưu &amp; Áp Dụng
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts (Order MUST be strictly maintained) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- 3D Engine & Cyber Settings -->
+  <script src="js/cyber-matrix.js"></script>
+  <script src="js/settings.js"></script>
   <script src="js/data.js"></script>
   <script src="js/lessons-data.js"></script>
   <script src="OJ/problems/problems-data.js"></script>
@@ -378,5 +601,6 @@
   <script src="js/forum-supabase.js"></script>
   <script src="js/lessons.js"></script>
   <script src="js/app.js"></script>
+
 </body>
 </html>

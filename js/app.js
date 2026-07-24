@@ -628,7 +628,7 @@ function renderRoadmapContent() {
   var milestones = roadmap.milestones;
   var progressPct = getRoadmapProgress(roadmap.id, milestones);
 
-  // -------- Build milestone HTML --------
+  // -------- Build 3D Milestone Nodes HTML --------
   var milestonesHtml = '';
   for (var i = 0; i < milestones.length; i++) {
     var m = milestones[i];
@@ -638,57 +638,70 @@ function renderRoadmapContent() {
                    m.difficulty === 'medium' ? 'badge-medium' : 'badge-hard';
     var badgeLabel = t('diff.' + m.difficulty);
 
+    var statusClass = checked ? 'status-mastered' : (i === 0 || isChecked(roadmap.id, milestones[Math.max(0, i - 1)].id) ? 'status-in-progress' : 'status-locked');
+    var statusText  = checked ? '✓ MASTERED' : (statusClass === 'status-in-progress' ? '⚡ IN PROGRESS' : '🔒 LOCKED');
+
     // Subtopics
     var topicsHtml = '';
     if (m.subtopics && m.subtopics.length > 0) {
-      topicsHtml += '<div><p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Topics</p><div class="flex flex-wrap gap-2">';
+      topicsHtml += '<div><p class="text-xs font-bold font-mono text-cyan-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5"></i> Skills & Subtopics</p><div class="flex flex-wrap gap-2">';
       for (var j = 0; j < m.subtopics.length; j++) {
-        topicsHtml += '<span class="px-3 py-1 rounded-lg bg-slate-800/50 border border-slate-700/50 text-xs text-slate-300">' + m.subtopics[j] + '</span>';
+        var subName = m.subtopics[j].replace(/'/g, "\\'");
+        topicsHtml += '<span onclick="openLessonForMilestone(\'' + subName + '\')" class="px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-mono text-cyan-300 hover:text-white hover:border-cyan-500/50 hover:bg-cyan-500/10 cursor-pointer transition-all shadow-sm flex items-center gap-1.5"><i data-lucide="book-open" class="w-3 h-3 text-cyan-400"></i> ' + m.subtopics[j] + '</span>';
       }
       topicsHtml += '</div></div>';
     }
 
-    // Problems
+    // Practice Problems
     var problemsHtml = '';
     if (m.problems && m.problems.length > 0) {
-      problemsHtml += '<div><p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Practice Problems</p><div class="space-y-2">';
+      problemsHtml += '<div><p class="text-xs font-bold font-mono text-purple-400 uppercase tracking-widest mb-2 flex items-center gap-1.5"><i data-lucide="code-2" class="w-3.5 h-3.5"></i> Curated Practice Problems</p><div class="grid sm:grid-cols-2 gap-2.5">';
       for (var j = 0; j < m.problems.length; j++) {
         var prob = m.problems[j];
         problemsHtml +=
-          '<a href="' + prob.link + '" target="_blank" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800/30 border border-slate-700/30 hover:border-cyan-500/20 hover:bg-cyan-500/5 transition-all group">' +
-            '<div class="w-6 h-6 rounded-md bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">' +
-              '<i data-lucide="code" class="w-3.5 h-3.5 text-cyan-400"></i>' +
+          '<a href="' + prob.link + '" target="_blank" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/40 hover:bg-cyan-500/10 transition-all group shadow-sm">' +
+            '<div class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">' +
+              '<i data-lucide="code" class="w-4 h-4 text-cyan-400"></i>' +
             '</div>' +
-            '<span class="flex-1 text-sm text-slate-300 group-hover:text-white transition-colors">' + prob.name + '</span>' +
-            '<span class="text-[10px] font-medium text-slate-600 group-hover:text-cyan-400 transition-colors">' + prob.platform + '</span>' +
+            '<span class="flex-1 text-xs font-bold text-slate-200 group-hover:text-white transition-colors truncate">' + prob.name + '</span>' +
+            '<span class="text-[10px] font-mono font-bold text-slate-500 group-hover:text-cyan-400 transition-colors px-2 py-0.5 rounded bg-slate-800">' + prob.platform + '</span>' +
             '<i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-600 group-hover:text-cyan-400 transition-colors"></i>' +
           '</a>';
       }
       problemsHtml += '</div></div>';
     } else {
-      problemsHtml = '<p class="text-xs text-slate-600 italic">Practice problems coming soon.</p>';
+      problemsHtml = '<p class="text-xs text-slate-500 italic">Curated practice telemetry coming soon.</p>';
     }
 
-    milestonesHtml +=
-      '<div class="timeline-milestone' + (checked ? ' checked' : '') + '" data-milestone-id="' + m.id + '">' +
-        '<div class="timeline-dot">' + (checked ? '&#10003;' : '') + '</div>' +
+    var milestoneTitleEsc = m.title.replace(/'/g, "\\'");
 
-        '<div class="milestone-header flex items-start justify-between p-4 rounded-xl hover:bg-slate-800/30 transition-colors" data-milestone-id="' + m.id + '">' +
-          '<div class="flex items-center gap-3 flex-1 min-w-0">' +
-            '<input type="checkbox" class="milestone-checkbox" data-roadmap="' + roadmap.id + '" data-milestone="' + m.id + '"' + (checked ? ' checked' : '') + '>' +
+    milestonesHtml +=
+      '<div class="roadmap-3d-node' + (checked ? ' checked' : '') + '" data-milestone-id="' + m.id + '">' +
+        '<div class="roadmap-3d-orb">' + (checked ? '<span style="color:#03060d;font-weight:900;font-size:11px">✓</span>' : '') + '</div>' +
+
+        '<div class="milestone-header flex items-start justify-between p-2 rounded-xl" data-milestone-id="' + m.id + '">' +
+          '<div class="flex items-start gap-4 flex-1 min-w-0">' +
+            '<input type="checkbox" class="milestone-checkbox mt-1" data-roadmap="' + roadmap.id + '" data-milestone="' + m.id + '"' + (checked ? ' checked' : '') + '>' +
             '<div class="flex-1 min-w-0">' +
-              '<div class="flex items-center gap-2 flex-wrap">' +
-                '<span class="text-sm font-bold text-white">' + m.title + '</span>' +
-                '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ' + badgeCls + '">' + badgeLabel + '</span>' +
-                (m.duration ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800/60 text-slate-400 border border-slate-700/50"><i data-lucide="clock" class="w-3 h-3"></i>' + m.duration + '</span>' : '') +
+              '<div class="flex items-center gap-2 flex-wrap mb-1.5">' +
+                '<span class="text-base font-black font-display text-white">' + m.title + '</span>' +
+                '<span class="roadmap-status-badge ' + statusClass + '">' + statusText + '</span>' +
+                '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ' + badgeCls + '">' + badgeLabel + '</span>' +
+                (m.duration ? '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-900 text-slate-400 border border-slate-800"><i data-lucide="clock" class="w-3 h-3"></i>' + m.duration + '</span>' : '') +
+              '</div>' +
+              '<!-- Direct Lesson Button -->' +
+              '<div class="mt-2">' +
+                '<button onclick="event.stopPropagation();openLessonForMilestone(\'' + milestoneTitleEsc + '\')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-blue-600/20 border border-cyan-500/40 text-cyan-300 hover:text-white hover:border-cyan-400 hover:bg-cyan-500/30 text-xs font-bold font-mono transition-all flex items-center gap-2 shadow-sm">' +
+                  '<i data-lucide="book-open" class="w-3.5 h-3.5 text-cyan-400"></i> Xem Bài Giảng Lộ Trình' +
+                '</button>' +
               '</div>' +
             '</div>' +
           '</div>' +
-          '<i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 mt-0.5 transition-transform duration-300 shrink-0"></i>' +
+          '<i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 mt-1 transition-transform duration-300 shrink-0"></i>' +
         '</div>' +
 
-        '<div class="accordion-content pl-4 pr-4">' +
-          '<div class="pb-4 pt-2 space-y-4">' +
+        '<div class="accordion-content pt-3">' +
+          '<div class="pb-2 pt-2 space-y-5 border-t border-slate-800/80 mt-3">' +
             topicsHtml +
             problemsHtml +
           '</div>' +
@@ -696,44 +709,50 @@ function renderRoadmapContent() {
       '</div>';
   }
 
-  // -------- Main content card --------
+  // -------- Main 3D Header Card --------
   var infoHtml = '';
   if (roadmap.goal || roadmap.timeFrame || roadmap.targetRating) {
-    infoHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">';
+    infoHtml += '<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">';
     if (roadmap.timeFrame) {
-      infoHtml += '<div class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700/40"><span class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Thời gian</span><span class="text-sm font-bold text-white">' + roadmap.timeFrame + '</span></div>';
+      infoHtml += '<div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800"><span class="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">Timeframe</span><span class="text-sm font-black text-white font-mono">' + roadmap.timeFrame + '</span></div>';
     }
     if (roadmap.targetRating) {
-      infoHtml += '<div class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700/40"><span class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider">CF Target</span><span class="text-sm font-bold text-cyan-400">' + roadmap.targetRating + '</span></div>';
+      infoHtml += '<div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800"><span class="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">CF Target</span><span class="text-sm font-black text-cyan-400 font-mono">' + roadmap.targetRating + '</span></div>';
     }
     if (roadmap.targetLevel) {
-      infoHtml += '<div class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700/40"><span class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Level</span><span class="text-sm font-bold text-amber-400">' + roadmap.targetLevel + '</span></div>';
+      infoHtml += '<div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800"><span class="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">Target Level</span><span class="text-sm font-black text-amber-400 font-mono">' + roadmap.targetLevel + '</span></div>';
     }
     if (roadmap.platforms && roadmap.platforms.length) {
-      infoHtml += '<div class="px-3 py-2 rounded-lg bg-slate-800/40 border border-slate-700/40"><span class="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Nền tảng</span><span class="text-sm font-bold text-emerald-400">' + roadmap.platforms.join(', ') + '</span></div>';
+      infoHtml += '<div class="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800"><span class="block text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider mb-1">Platforms</span><span class="text-sm font-black text-emerald-400 font-mono">' + roadmap.platforms.join(', ') + '</span></div>';
     }
     infoHtml += '</div>';
     if (roadmap.goal) {
-      infoHtml += '<p class="text-xs text-slate-400 leading-relaxed mb-5 px-1">🎯 ' + roadmap.goal + '</p>';
+      infoHtml += '<div class="p-4 rounded-2xl bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border border-cyan-500/20 text-xs text-slate-300 leading-relaxed mb-6 flex items-start gap-2.5"><i data-lucide="target" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i> <span>' + roadmap.goal + '</span></div>';
     }
   }
 
   content.innerHTML =
-    '<div class="card p-6">' +
-      '<div class="flex items-center justify-between mb-4">' +
+    '<div class="card p-6 sm:p-8 mb-8">' +
+      '<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-800/80">' +
         '<div>' +
-          '<h3 class="text-xl font-bold text-white">' + t('roadmap.' + roadmap.id) + '</h3>' +
-          '<p class="text-sm text-slate-500 mt-1">' + milestones.length + ' ' + t('roadmap.milestones') + '</p>' +
+          '<h3 class="text-2xl sm:text-3xl font-black font-display text-white flex items-center gap-3">' + 
+            '<i data-lucide="cpu" class="w-7 h-7 text-cyan-400"></i> ' + t('roadmap.' + roadmap.id) + 
+          '</h3>' +
+          '<p class="text-xs font-mono text-slate-400 mt-1">' + milestones.length + ' 3D HOLOGRAPHIC MILESTONES IN PIPELINE</p>' +
         '</div>' +
-        '<div class="text-right">' +
-          '<span class="text-2xl font-extrabold text-cyan-400" id="roadmapPct">' + progressPct + '%</span>' +
-          '<div class="progress-bar w-32 mt-1 ml-auto">' +
-            '<div class="progress-fill bg-gradient-to-r from-cyan-500 to-blue-500" id="roadmapProgressFill" style="width:' + progressPct + '%"></div>' +
+        '<div class="text-left sm:text-right bg-slate-900/80 px-5 py-3 rounded-2xl border border-cyan-500/30 shadow-lg shadow-cyan-500/10">' +
+          '<div class="text-xs font-mono font-bold text-slate-400 uppercase mb-1">Pipeline Completion</div>' +
+          '<span class="text-3xl font-black text-cyber-cyan font-mono" id="roadmapPct">' + progressPct + '%</span>' +
+          '<div class="progress-bar w-36 mt-2">' +
+            '<div class="progress-fill bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600" id="roadmapProgressFill" style="width:' + progressPct + '%"></div>' +
           '</div>' +
         '</div>' +
       '</div>' +
       infoHtml +
-      '<div class="space-y-0">' + milestonesHtml + '</div>' +
+    '</div>' +
+    '<div class="roadmap-pipeline-container">' +
+      '<div class="roadmap-pipeline-track"></div>' +
+      milestonesHtml +
     '</div>';
 
   lucide.createIcons();
@@ -745,14 +764,15 @@ function renderRoadmapContent() {
       // Ignore clicks on the checkbox itself
       if (e.target.type === 'checkbox') return;
 
-      var parentEl = this.closest('.timeline-milestone');
+      var parentEl = this.closest('.roadmap-3d-node, .timeline-milestone');
+      if (!parentEl) return;
       var accordionEl = parentEl.querySelector('.accordion-content');
       var icon = parentEl.querySelector('[data-lucide="chevron-down"]');
       var isOpen = accordionEl.classList.contains('open');
 
       // Close all siblings
       var siblings = content.querySelectorAll('.accordion-content');
-      var ms = content.querySelectorAll('.timeline-milestone');
+      var ms = content.querySelectorAll('.roadmap-3d-node, .timeline-milestone');
       var icons = content.querySelectorAll('[data-lucide="chevron-down"]');
       for (var j = 0; j < siblings.length; j++) { siblings[j].classList.remove('open'); }
       for (var j = 0; j < ms.length; j++) { ms[j].classList.remove('active'); }
@@ -773,7 +793,8 @@ function renderRoadmapContent() {
     checkboxes[i].addEventListener('change', function() {
       var rid  = this.dataset.roadmap;
       var mid  = this.dataset.milestone;
-      var parentEl = this.closest('.timeline-milestone');
+      var parentEl = this.closest('.roadmap-3d-node, .timeline-milestone');
+      if (!parentEl) return;
 
       toggleMilestone(rid, mid);
 
@@ -784,8 +805,8 @@ function renderRoadmapContent() {
         parentEl.classList.remove('checked');
       }
 
-      var dot = parentEl.querySelector('.timeline-dot');
-      if (dot) { dot.innerHTML = this.checked ? '&#10003;' : ''; }
+      var orb = parentEl.querySelector('.roadmap-3d-orb, .timeline-dot');
+      if (orb) { orb.innerHTML = this.checked ? '<span style="color:#03060d;font-weight:900;font-size:11px">✓</span>' : ''; }
 
       // Recalculate and update progress
       var roadmaps = VOID_DATA.roadmaps;

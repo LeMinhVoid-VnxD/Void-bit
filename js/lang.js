@@ -93,10 +93,11 @@ var LANG = {
     'roadmap.done':      'Done',
 
     // Roadmap names (keep original for proper names)
-    'roadmap.basics-cpp':  'Basics & C++',
-    'roadmap.hsg-tinh':    'HSG Tỉnh',
-    'roadmap.hsg-quocgia': 'HSG Quốc Gia',
-    'roadmap.ioi-icpc':    'IOI & ICPC',
+    'roadmap.hsg-thcs':       'HSG THCS (Cấp II)',
+    'roadmap.hsg-tinh':       'HSG Tỉnh (THPT)',
+    'roadmap.hsg-quocgia':    'VOI — HSG Quốc Gia',
+    'roadmap.ioi-icpc':       'IOI & ICPC World Finals',
+    'roadmap.noob-to-tourist':'Noob to Tourist (800 ➔ 3000+)',
 
     // Lesson viewer
     'lesson.title':     'Lesson Library',
@@ -274,10 +275,11 @@ var LANG = {
     'roadmap.done':      'Xong',
 
     // Roadmap names
-    'roadmap.basics-cpp':  'C++ Cơ bản',
-    'roadmap.hsg-tinh':    'HSG Tỉnh',
-    'roadmap.hsg-quocgia': 'HSG Quốc Gia',
-    'roadmap.ioi-icpc':    'IOI & ICPC',
+    'roadmap.hsg-thcs':       'HSG THCS (Cấp II)',
+    'roadmap.hsg-tinh':       'HSG Tỉnh (THPT)',
+    'roadmap.hsg-quocgia':    'VOI — HSG Quốc Gia',
+    'roadmap.ioi-icpc':       'IOI & ICPC World Finals',
+    'roadmap.noob-to-tourist':'Noob to Tourist (800 ➔ 3000+)',
 
     // Lesson viewer
     'lesson.title':     'Thư viện bài giảng',
